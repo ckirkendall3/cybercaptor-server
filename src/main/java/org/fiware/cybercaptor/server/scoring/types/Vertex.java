@@ -23,6 +23,8 @@ package org.fiware.cybercaptor.server.scoring.types;
 
 import org.fiware.cybercaptor.server.attackgraph.ImpactMetric;
 
+import java.util.*;
+
 /**
  * Class used to represent the vertex of a graph
  *
@@ -51,14 +53,14 @@ public class Vertex {
     private String Type;
 
     /**
-     * The arc dependancy set
+     * The vertex predecessor set
      */
-    private Arc[] ArcDependancySet = null;
+    private List<Vertex> Predecessors = new ArrayList<>();
 
     /**
-     * The vertex dependancy set
+     * The number of predecessors (optimized for performance)
      */
-    private Vertex[] VertexDependancySet = null;
+    private int NumPrececessors = 0;
 
     /**
      * The vertex impact metrics
@@ -90,8 +92,6 @@ public class Vertex {
         Fact = vertex.Fact;
         MulvalMetric = vertex.MulvalMetric;
         setType(vertex.getType());
-        setArcDependancySet(vertex.getArcDependancySet());
-        setVertexDependancySet(vertex.getVertexDependancySet());
     }
 
     /**
@@ -169,80 +169,6 @@ public class Vertex {
     //END CODE KM
 
     /**
-     * Add vertex dependency.
-     *
-     * @param vertex the vertex
-     */
-    public void addVertexDependency(Vertex vertex) {
-
-        if (this.getVertexDependancySet() == null) {
-            Vertex[] result = new Vertex[1];
-            result[result.length - 1] = vertex;
-            this.setVertexDependancySet(result);
-        } else {
-            Vertex[] result = new Vertex[this.getVertexDependancySet().length + 1];
-            System.arraycopy(this.getVertexDependancySet(), 0, result, 0, this.getVertexDependancySet().length);
-            result[result.length - 1] = vertex;
-            this.setVertexDependancySet(result);
-        }
-    }
-
-    /**
-     * Add arc dependency.
-     *
-     * @param arc the arc
-     */
-    public void addArcDependency(Arc arc) {
-
-        if (this.getArcDependancySet() == null) {
-            Arc[] result = new Arc[1];
-            result[result.length - 1] = arc;
-            this.setArcDependancySet(result);
-        } else {
-            Arc[] result = new Arc[this.getArcDependancySet().length + 1];
-            System.arraycopy(this.getArcDependancySet(), 0, result, 0, this.getArcDependancySet().length);
-            result[result.length - 1] = arc;
-            this.setArcDependancySet(result);
-        }
-    }
-
-    /**
-     * Get arc dependancy set.
-     *
-     * @return the arc [ ]
-     */
-    public Arc[] getArcDependancySet() {
-        return ArcDependancySet;
-    }
-
-    /**
-     * Sets arc dependancy set.
-     *
-     * @param arcDependancySet the arc dependancy set
-     */
-    public void setArcDependancySet(Arc[] arcDependancySet) {
-        ArcDependancySet = arcDependancySet;
-    }
-
-    /**
-     * Get vertex dependancy set.
-     *
-     * @return the vertex [ ]
-     */
-    public Vertex[] getVertexDependancySet() {
-        return VertexDependancySet;
-    }
-
-    /**
-     * Sets vertex dependancy set.
-     *
-     * @param vertexDependancySet the vertex dependancy set
-     */
-    public void setVertexDependancySet(Vertex[] vertexDependancySet) {
-        VertexDependancySet = vertexDependancySet;
-    }
-
-    /**
      * Get impact metrics.
      *
      * @return the impact metric [ ]
@@ -258,5 +184,23 @@ public class Vertex {
      */
     public void setImpactMetrics(ImpactMetric[] impactMetrics) {
         ImpactMetrics = impactMetrics;
+    }
+
+    public List<Vertex> getPredecessors() {
+        return Predecessors;
+    }
+
+    public void setPredecessors(List<Vertex> predecessors) {
+        Predecessors = predecessors;
+        NumPrececessors = Predecessors.size();
+    }
+
+    public void addPredecessor(Vertex vertex) {
+        Predecessors.add(vertex);
+        NumPrececessors++;
+    }
+
+    public int getNumPredecessors() {
+        return NumPrececessors;
     }
 }

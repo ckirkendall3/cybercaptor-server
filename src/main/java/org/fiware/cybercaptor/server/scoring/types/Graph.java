@@ -20,6 +20,9 @@
  ****************************************************************************************/
 package org.fiware.cybercaptor.server.scoring.types;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Class used to represent a graph
  *
@@ -35,7 +38,7 @@ public class Graph {
     /**
      * The vertices of the graph
      */
-    private Vertex[] Vertices;
+    private Map<Integer, Vertex> VertexMap;
 
     /**
      * Instantiates a new Graph.
@@ -49,32 +52,14 @@ public class Graph {
     }
 
     /**
-     * Get predecessors.
+     * Instantiates a new Graph.
      *
      * @param arcs     the arcs
-     * @param vertexID the vertex iD
-     * @return the double [ ]
+     * @param vertices the vertices
      */
-    public static double[] getPredecessors(Arc[] arcs, double vertexID) {
-        int counter = 0;
-        double[] result = null;
-        //the first for loop is to get the cardinality of the query result
-        for (Arc arc : arcs) {
-            if (arc.getSource() == vertexID) {
-                counter++;
-            }
-        }
-        if (counter != 0) {
-            result = new double[counter];
-            counter = 0;
-            for (Arc arc : arcs) {
-                if (arc.getSource() == vertexID) {
-                    result[counter] = arc.getDestination();
-                    counter++;
-                }
-            }
-        }
-        return result;
+    public Graph(Arc[] arcs, Map<Integer, Vertex> vertices) {
+        Arcs = arcs;
+        VertexMap = vertices;
     }
 
     /**
@@ -99,36 +84,6 @@ public class Graph {
             for (Vertex vertice : vertices) {
                 if (vertice.getType().equals(type) && vertice.getFact().startsWith("execCode")) {
                     result[counter] = vertice;
-                    counter++;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Get predecessors.
-     *
-     * @param arcs     the arcs
-     * @param vertices the vertices
-     * @param vertexID the vertex iD
-     * @return the vertex [ ]
-     */
-    public static Vertex[] getPredecessors(Arc[] arcs, Vertex[] vertices, double vertexID) {
-        int counter = 0;
-        Vertex[] result = null;
-        //the first for loop is to get the cardinality of the query result
-        for (Arc arc1 : arcs) {
-            if (arc1.getSource() == vertexID) {
-                counter++;
-            }
-        }
-        if (counter != 0) {
-            result = new Vertex[counter];
-            counter = 0;
-            for (Arc arc : arcs) {
-                if (arc.getSource() == vertexID) {
-                    result[counter] = getVertexOnID(vertices, arc.getDestination());
                     counter++;
                 }
             }
@@ -243,7 +198,7 @@ public class Graph {
      * @return the vertex [ ]
      */
     public Vertex[] getVertices() {
-        return Vertices;
+        return (Vertex[]) VertexMap.values().toArray();
     }
 
     /**
@@ -252,7 +207,27 @@ public class Graph {
      * @param vertices the vertices
      */
     public void setVertices(Vertex[] vertices) {
-        Vertices = vertices;
+        Map<Integer, Vertex> map = new HashMap<>();
+        for (Vertex vertex : vertices)
+        {
+            map.put(vertex.getID(), vertex);
+        }
+        VertexMap = map;
+    }
+
+    public Map<Integer, Vertex> getVertexMap() {
+        return VertexMap;
+    }
+
+    /**
+     * Loops through all the arcs and configures the predecessors for all the
+     * vertices.
+     */
+    public void getPredecessors() {
+        //the first for loop is to get the cardinality of the query result
+        for (Arc arc : Arcs) {
+            VertexMap.get(arc.getSource()).addPredecessor(VertexMap.get(arc.getDestination()));
+        }
     }
 
 }

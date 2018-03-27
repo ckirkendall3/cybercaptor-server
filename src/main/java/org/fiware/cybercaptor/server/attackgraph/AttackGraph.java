@@ -49,12 +49,12 @@ public class AttackGraph implements Cloneable {
     /**
      * A list of vertices
      */
-    public HashMap<Integer, Vertex> vertices = new HashMap<Integer, Vertex>();
+    public HashMap<Integer, Vertex> vertices = new HashMap<>();
 
     /**
      * A list of arcs between the vertices
      */
-    public ArrayList<Arc> arcs = new ArrayList<Arc>();
+    public ArrayList<Arc> arcs = new ArrayList<>();
 
     /**
      * The global score of the attack graph
