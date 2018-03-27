@@ -20,6 +20,7 @@
  ****************************************************************************************/
 package org.fiware.cybercaptor.server.scoring.types;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,8 @@ public class Graph {
      */
     private Arc[] Arcs;
 
+    private Vertex[] Vertices;
+
     /**
      * The vertices of the graph
      */
@@ -49,17 +52,18 @@ public class Graph {
     public Graph(Arc[] arcs, Vertex[] vertices) {
         setArcs(arcs);
         setVertices(vertices);
+        initializeVertexMap();
     }
 
     /**
      * Instantiates a new Graph.
      *
      * @param arcs     the arcs
-     * @param vertices the vertices
+     * @param vertexMap the vertices
      */
-    public Graph(Arc[] arcs, Map<Integer, Vertex> vertices) {
+    public Graph(Arc[] arcs, Map<Integer, Vertex> vertexMap) {
         Arcs = arcs;
-        VertexMap = vertices;
+        VertexMap = vertexMap;
     }
 
     /**
@@ -73,17 +77,17 @@ public class Graph {
         int counter = 0;
         Vertex[] result = null;
         //the first for loop is to get the cardinality of the query result
-        for (Vertex vertice1 : vertices) {
-            if (vertice1.getType().equals(type) && vertice1.getFact().startsWith("execCode")) {
+        for (Vertex vertex : vertices) {
+            if (vertex.getType().equals(type) && vertex.getFact().startsWith("execCode")) {
                 counter++;
             }
         }
         if (counter != 0) {
             result = new Vertex[counter];
             counter = 0;
-            for (Vertex vertice : vertices) {
-                if (vertice.getType().equals(type) && vertice.getFact().startsWith("execCode")) {
-                    result[counter] = vertice;
+            for (Vertex vertex : vertices) {
+                if (vertex.getType().equals(type) && vertex.getFact().startsWith("execCode")) {
+                    result[counter] = vertex;
                     counter++;
                 }
             }
@@ -98,8 +102,8 @@ public class Graph {
      * @param vertexID the vertex iD
      * @return the double
      */
-    public static double getIngoingArcsNumber(Arc[] arcs, double vertexID) {
-        double counter = 0;
+    public static int getIngoingArcsNumber(Arc[] arcs, int vertexID) {
+        int counter = 0;
         for (Arc arc : arcs) {
             if (arc.getSource() == vertexID) {
                 counter++;
@@ -116,8 +120,8 @@ public class Graph {
      * @param vertexID the vertex iD
      * @return the double
      */
-    public static double getOutgoingArcsNumber(Arc[] arcs, double vertexID) {
-        double counter = 0;
+    public static int getOutgoingArcsNumber(Arc[] arcs, int vertexID) {
+        int counter = 0;
         for (Arc arc : arcs) {
             if (arc.getDestination() == vertexID) {
                 counter++;
@@ -138,40 +142,23 @@ public class Graph {
         int counter = 0;
         Vertex[] result = null;
         //the first for loop is to get the cardinality of the query result
-        for (Vertex vertice1 : vertices) {
+        for (Vertex vertex : vertices) {
             //System.out.println("i:"+i);
-            if (vertice1.getType().equals(type)) {
+            if (vertex.getType().equals(type)) {
                 counter++;
             }
         }
         if (counter != 0) {
             result = new Vertex[counter];
             counter = 0;
-            for (Vertex vertice : vertices) {
-                if (vertice.getType().equals(type)) {
-                    result[counter] = vertice;
+            for (Vertex vertex : vertices) {
+                if (vertex.getType().equals(type)) {
+                    result[counter] = vertex;
                     counter++;
                 }
             }
         }
         return result;
-    }
-
-    /**
-     * Get vertex on iD.
-     *
-     * @param vertices the vertices
-     * @param ID       the iD
-     * @return the vertex
-     */
-    public static Vertex getVertexOnID(Vertex[] vertices, double ID) {
-        //the first for loop is to get the cardinality of the query result
-        for (Vertex vertice : vertices) {
-            if (vertice.getID() == ID) {
-                return vertice;
-            }
-        }
-        return null;
     }
 
     /**
@@ -198,7 +185,7 @@ public class Graph {
      * @return the vertex [ ]
      */
     public Vertex[] getVertices() {
-        return (Vertex[]) VertexMap.values().toArray();
+        return Vertices;
     }
 
     /**
@@ -207,12 +194,15 @@ public class Graph {
      * @param vertices the vertices
      */
     public void setVertices(Vertex[] vertices) {
-        Map<Integer, Vertex> map = new HashMap<>();
-        for (Vertex vertex : vertices)
+        Vertices = vertices;
+    }
+
+    private void initializeVertexMap() {
+        VertexMap = new HashMap<>();
+        for (Vertex vertex : Vertices)
         {
-            map.put(vertex.getID(), vertex);
+            VertexMap.put(vertex.getID(), vertex);
         }
-        VertexMap = map;
     }
 
     public Map<Integer, Vertex> getVertexMap() {
