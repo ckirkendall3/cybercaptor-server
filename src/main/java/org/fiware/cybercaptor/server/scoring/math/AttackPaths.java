@@ -24,6 +24,11 @@ import org.fiware.cybercaptor.server.scoring.types.Arc;
 import org.fiware.cybercaptor.server.scoring.types.Graph;
 import org.fiware.cybercaptor.server.scoring.types.Vertex;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Class used to represent an attack path
  *
@@ -76,9 +81,7 @@ public class AttackPaths {
 
         if (Targets != null) {
             Graph[] GraphTable = new Graph[Targets.length];
-            for (int i = 0; i < Targets.length; i++) {
-                GraphTable[i] = exploreAttackPath2(Targets[i], null, AttackGraph);
-            }
+            Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath2(Targets[i], null, AttackGraph));
             return GraphTable;
         } else {
             return null;
@@ -116,9 +119,9 @@ public class AttackPaths {
     public static Graph exploreAttackPath(Vertex V, Vertex[] Forbidden, Graph graph, Graph AttackPath) {
         Vertex[] vertices = new Vertex[graph.getVertices().length];
         Arc[] arcs = new Arc[graph.getArcs().length];
-        Vertex LEAFVertex = new Vertex(0.0, "", 0.0, "LEAF");
-        Vertex ORVertex = new Vertex(0.0, "", 0.0, "OR");
-        Vertex ANDVertex = new Vertex(0.0, "", 0.0, "AND");
+        Vertex LEAFVertex = new Vertex(0, "", 0.0, "LEAF");
+        Vertex ORVertex = new Vertex(0, "", 0.0, "OR");
+        Vertex ANDVertex = new Vertex(0, "", 0.0, "AND");
 
         for (int m = 0; m < vertices.length; m++) {
             vertices[m] = new Vertex(graph.getVertices()[m]);
@@ -172,9 +175,9 @@ public class AttackPaths {
     public static Graph exploreAttackPath2(Vertex V, Vertex[] Forbidden, Graph graph) {
         Vertex[] vertices = new Vertex[graph.getVertices().length];
         Arc[] arcs = new Arc[graph.getArcs().length];
-        Vertex LEAFVertex = new Vertex(0.0, "", 0.0, "LEAF");
-        Vertex ORVertex = new Vertex(0.0, "", 0.0, "OR");
-        Vertex ANDVertex = new Vertex(0.0, "", 0.0, "AND");
+        Vertex LEAFVertex = new Vertex(0, "", 0.0, "LEAF");
+        Vertex ORVertex = new Vertex(0, "", 0.0, "OR");
+        Vertex ANDVertex = new Vertex(0, "", 0.0, "AND");
         Graph Result = null;
 
         for (int m = 0; m < vertices.length; m++) {

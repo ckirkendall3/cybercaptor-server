@@ -59,8 +59,17 @@ public class Launch {
      * @return the score of the attack graph
      * @throws Exception
      */
-    public static double main(double[] vertexIDTable, String[] vertexFactTable, double[] vertexMulvalMetricTable, String[] vertexTypeTable, double[] arcSrcTable, double[] arcDstTable, ImpactMetric[][] ImpactMetrics, String pathToAttackPathsFile, double previousMaxScore) throws Exception {
-
+    public static double main(
+            int[] vertexIDTable,
+            String[] vertexFactTable,
+            double[] vertexMulvalMetricTable,
+            String[] vertexTypeTable,
+            int[] arcSrcTable,
+            int[] arcDstTable,
+            ImpactMetric[][] ImpactMetrics,
+            String pathToAttackPathsFile,
+            double previousMaxScore) throws Exception
+    {
         Arc[] ArcsTable = new Arc[arcSrcTable.length];
         Vertex[] VerticesTable = new Vertex[vertexIDTable.length];
 

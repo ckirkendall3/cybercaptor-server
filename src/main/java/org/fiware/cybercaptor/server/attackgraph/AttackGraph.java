@@ -578,13 +578,13 @@ public class AttackGraph implements Cloneable {
      * @throws Exception
      */
     public List<AttackPath> scoreAttackGraphAndGetAttackPaths(String outputPath, double previousMaxScore) throws Exception {
-        double[] vertexIDTable = new double[this.getNumberOfVertices()];
+        int[] vertexIDTable = new int[this.getNumberOfVertices()];
         String[] vertexFactTable = new String[this.getNumberOfVertices()];
         double[] vertexMulvalMetricTable = new double[this.getNumberOfVertices()];
         String[] vertexTypeTable = new String[this.getNumberOfVertices()];
 
-        double[] arcSrcTable = new double[this.arcs.size()];
-        double[] arcDstTable = new double[this.arcs.size()];
+        int[] arcSrcTable = new int[this.arcs.size()];
+        int[] arcDstTable = new int[this.arcs.size()];
         ImpactMetric[][] impactMetrics = new ImpactMetric[this.getNumberOfVertices()][];
 
         int i = 0;

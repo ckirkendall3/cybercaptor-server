@@ -31,12 +31,12 @@ public class Arc {
     /**
      * The source id
      */
-    private double Source;
+    private int Source;
 
     /**
      * the destination id
      */
-    private double Destination;
+    private int Destination;
 
     /**
      * The Arc dependancy set.
@@ -54,7 +54,7 @@ public class Arc {
      * @param source      the source id
      * @param destination the destination id
      */
-    public Arc(double source, double destination) {
+    public Arc(int source, int destination) {
         Source = source;
         Destination = destination;
     }
@@ -64,7 +64,7 @@ public class Arc {
      *
      * @return the source id
      */
-    public double getSource() {
+    public int getSource() {
         return Source;
     }
 
@@ -73,7 +73,7 @@ public class Arc {
      *
      * @param source the source id
      */
-    public void setSource(double source) {
+    public void setSource(int source) {
         Source = source;
     }
 
@@ -82,7 +82,7 @@ public class Arc {
      *
      * @return the destination id
      */
-    public double getDestination() {
+    public int getDestination() {
         return Destination;
     }
 
@@ -91,7 +91,7 @@ public class Arc {
      *
      * @param destination the destination id
      */
-    public void setDestination(double destination) {
+    public void setDestination(int destination) {
         Destination = destination;
     }
 

@@ -32,8 +32,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.encoding>UTF-8</project.encoding>
-        <project.source.version>1.7</project.source.version>
-        <project.target.version>1.7</project.target.version>
+        <project.source.version>1.8</project.source.version>
+        <project.target.version>1.8</project.target.version>
         <jersey.version>2.13</jersey.version>
         <github.global.server>github</github.global.server>
     </properties>

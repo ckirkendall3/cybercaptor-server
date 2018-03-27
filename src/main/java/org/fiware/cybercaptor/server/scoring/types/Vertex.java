@@ -33,7 +33,7 @@ public class Vertex {
     /**
      * The vertex ID
      */
-    private double ID;
+    private int ID;
 
     /**
      * The vertex Fact
@@ -73,7 +73,7 @@ public class Vertex {
      * @param metric the metric
      * @param type   the type
      */
-    public Vertex(double id, String fact, double metric, String type) {
+    public Vertex(int id, String fact, double metric, String type) {
         ID = id;
         Fact = fact;
         MulvalMetric = metric;
@@ -99,7 +99,7 @@ public class Vertex {
      *
      * @return the iD
      */
-    public double getID() {
+    public int getID() {
         return ID;
     }
 
@@ -108,7 +108,7 @@ public class Vertex {
      *
      * @param id the id
      */
-    public void setID(double id) {
+    public void setID(int id) {
         ID = id;
     }
 
