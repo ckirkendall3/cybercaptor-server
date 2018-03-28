@@ -61,8 +61,9 @@ public class Graph {
      * @param arcs     the arcs
      * @param vertexMap the vertices
      */
-    public Graph(Arc[] arcs, Map<Integer, Vertex> vertexMap) {
+    public Graph(Arc[] arcs, Vertex[] vertices,  Map<Integer, Vertex> vertexMap) {
         Arcs = arcs;
+        Vertices = vertices;
         VertexMap = vertexMap;
     }
 
