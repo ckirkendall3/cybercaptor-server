@@ -147,7 +147,7 @@ public class AttackPaths {
      * @param predecessor the secon graph
      * @return the merged graph
      */
-    public static Graph mergeGraphs(Graph successor, Graph predecessor) {
+    private static Graph mergeGraphs(Graph successor, Graph predecessor) {
         Graph result;
         if (successor == null) {
             return predecessor;
@@ -156,9 +156,20 @@ public class AttackPaths {
             return successor;
         }
 
-        result = new Graph(successor.getArcs(), successor.getVertices());
-        result.getArcs().addAll(predecessor.getArcs());
-        result.getVertices().addAll(predecessor.getVertices());
+        Set<Arc> arcs = predecessor.getArcs();
+        for (Arc arc : successor.getArcs()) {
+            if (!arcs.contains(arc)) {
+                arcs.add(arc);
+            }
+        }
+
+        Map<Integer, Vertex> vertices = new HashMap<>(predecessor.getVertexMap());
+        for (Vertex vertex : successor.getVertexMap().values() ) {
+            if (!vertices.containsKey(vertex.getID())) {
+                vertices.put(vertex.getID(), vertex);
+            }
+        }
+        result = new Graph(arcs, vertices);
         return result;
     }
 
@@ -170,9 +181,9 @@ public class AttackPaths {
      * @return the new graph
      */
     private static Graph createAtomicGraph(Vertex V, Vertex D) {
-        Set<Vertex> vertices = new HashSet<>();
-        vertices.add(V);
-        vertices.add(D);
+        Map<Integer, Vertex> vertices = new HashMap<>();
+        vertices.put(V.getID(), V);
+        vertices.put(D.getID(), D);
         Set<Arc> arcs = new HashSet<>();
         arcs.add(new Arc(V.getID(), D.getID()));
         return new Graph(arcs, vertices);
