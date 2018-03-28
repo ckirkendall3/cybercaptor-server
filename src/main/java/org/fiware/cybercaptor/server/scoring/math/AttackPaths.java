@@ -45,7 +45,7 @@ public class AttackPaths {
         if (Targets != null) {
             AttackGraph.getPredecessors();
             Graph[] GraphTable = new Graph[Targets.length];
-            Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath2(Targets[i], null, AttackGraph));
+            Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath2(Targets[i], new HashSet<>(), AttackGraph));
             return GraphTable;
         } else {
             return null;
@@ -60,17 +60,16 @@ public class AttackPaths {
      * @param graph     the attack graph
      * @return the created attack path
      */
-    private static Graph exploreAttackPath2(Vertex V, HashSet<Integer> Forbidden, Graph graph) {
+    private static Graph exploreAttackPath2(Vertex V, Set<Integer> Forbidden, Graph graph) {
         Vertex LEAFVertex = new Vertex(0, "", 0.0, "LEAF");
         Vertex ORVertex = new Vertex(0, "", 0.0, "OR");
         Vertex ANDVertex = new Vertex(0, "", 0.0, "AND");
         Graph Result = null;
 
+        // Must reset the reference so we don't modify the incoming map
+        Forbidden = new HashSet<>(Forbidden);
+
         List<Vertex> predecessors = V.getPredecessors();
-        if (V.getType().equals(ORVertex.getType()) && Forbidden == null) {
-            Forbidden = new HashSet<>();
-            Forbidden.add(V.getID());
-        }
         if (V.getType().equals(ANDVertex.getType())) {
             if (predecessors != null) {
                 List<Graph> Buffers = new ArrayList<>();
@@ -79,9 +78,8 @@ public class AttackPaths {
                         if (D.getType().equals(LEAFVertex.getType())) {
                             Buffers.add(createAtomicGraph(V, D));
                         } else if (D.getType().equals(ORVertex.getType())) {
-                            if (Forbidden == null || !Forbidden.contains(D.getID())) {
-                                if (Forbidden == null) {
-                                    Forbidden = new HashSet<>();
+                            if (!Forbidden.contains(D.getID())) {
+                                if (Forbidden.isEmpty()) {
                                     Forbidden.add(D.getID());
                                 } else {
                                     Forbidden.add(D.getID());
@@ -113,6 +111,9 @@ public class AttackPaths {
             return Result;
         }
         if (V.getType().equals(ORVertex.getType())) {
+            if ( Forbidden.isEmpty() ) {
+                Forbidden.add(V.getID());
+            }
             if (predecessors != null) {
                 Graph Buffer = null;
                 boolean atLeastOnePath = false;
