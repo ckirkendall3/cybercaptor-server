@@ -71,7 +71,7 @@ public class ScoringFormulas {
     public double globalScore(Graph attackPath) {
 
         double RiskScore   = riskScore(
-                attackPath.getVertexMap().values().toArray(new Vertex[attackPath.getVertexMap().size()]),
+                attackPath.getVertices().toArray(new Vertex[attackPath.getVertices().size()]),
                 attackPath.getArcs().toArray(new Arc[attackPath.getArcs().size()]));
         double ImpactScore = impactScore(attackPath);
         return RiskScore + ImpactScore;
@@ -124,7 +124,7 @@ public class ScoringFormulas {
      */
     public double impactScore(Graph attackPath) {
         double impactScore = 0.0;
-        for (Vertex vertex : attackPath.getVertexMap().values()) {
+        for (Vertex vertex : attackPath.getVertices()) {
             if (vertex.getImpactMetrics() != null) {
                 for (int j = 0; j < vertex.getImpactMetrics().length; j++) {
                     ImpactMetric impactMetric = vertex.getImpactMetrics()[j];

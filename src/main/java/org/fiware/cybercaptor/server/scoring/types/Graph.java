@@ -37,7 +37,7 @@ public class Graph {
     /**
      * The vertices of the graph
      */
-    private Map<Integer, Vertex> VertexMap;
+    private Set<Vertex> Vertices;
 
     /**
      * Instantiates a new Graph.
@@ -47,22 +47,18 @@ public class Graph {
      */
     public Graph(Arc[] arcs, Vertex[] vertices) {
         Arcs = new HashSet<>(Arrays.asList(arcs));
-        VertexMap = new HashMap<>();
-        for (Vertex vertex : vertices)
-        {
-            VertexMap.put(vertex.getID(), vertex);
-        }
+        Vertices = new HashSet<>(Arrays.asList(vertices));
     }
 
     /**
      * Instantiates a new Graph.
      *
      * @param arcs     the arcs
-     * @param vertexMap the vertices
+     * @param vertices the vertices
      */
-    public Graph(Set<Arc> arcs, Map<Integer, Vertex> vertexMap) {
+    public Graph(Set<Arc> arcs, Set<Vertex> vertices) {
         Arcs = arcs;
-        VertexMap = vertexMap;
+        Vertices = vertices;
     }
 
     /**
@@ -169,17 +165,9 @@ public class Graph {
         return Arcs;
     }
 
-    /**
-     * Sets arcs.
-     *
-     * @param arcs the arcs
-     */
-    //public void setArcs(Set<Arc> arcs) {
-    //    Arcs = arcs;
-    //}
 
-    public Map<Integer, Vertex> getVertexMap() {
-        return VertexMap;
+    public Set<Vertex> getVertices() {
+        return Vertices;
     }
 
     /**
@@ -187,9 +175,13 @@ public class Graph {
      * vertices.
      */
     public void getPredecessors() {
+        Map<Integer, Vertex> vertexMap = new HashMap<>();
+        for (Vertex vertex : Vertices) {
+            vertexMap.put(vertex.getID(), vertex);
+        }
         //the first for loop is to get the cardinality of the query result
         for (Arc arc : Arcs) {
-            VertexMap.get(arc.getSource()).addPredecessor(VertexMap.get(arc.getDestination()));
+            vertexMap.get(arc.getSource()).addPredecessor(vertexMap.get(arc.getDestination()));
         }
     }
 

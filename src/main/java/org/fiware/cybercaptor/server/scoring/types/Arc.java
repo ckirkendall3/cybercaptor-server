@@ -98,6 +98,6 @@ public class Arc {
 
     @Override
     public int hashCode() {
-        return Objects.hash(Source, Destination);
+        return (2^15)*Source + Destination;
     }
 }

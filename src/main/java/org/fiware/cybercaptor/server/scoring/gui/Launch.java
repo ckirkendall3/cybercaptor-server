@@ -33,6 +33,7 @@ import org.jdom2.output.XMLOutputter;
 
 import java.io.FileOutputStream;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -115,7 +116,7 @@ public class Launch {
         if (AttackPaths != null) {
             for (Graph AttackPathBuffer : AttackPaths) {
                 Arc[] AttackPathArcs = AttackPathBuffer.getArcs().toArray(new Arc[AttackPathBuffer.getArcs().size()]);
-                Map<Integer, Vertex> AttackPathVertices = AttackPathBuffer.getVertexMap();
+                Set<Vertex> AttackPathVertices = AttackPathBuffer.getVertices();
                 root = new Element("attack_path");
                 Element scoringElement = new Element("scoring");
                 scoringElement.setText(String.valueOf(formulas.MinMax(formulas.globalScore(AttackPathBuffer),

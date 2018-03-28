@@ -203,4 +203,20 @@ public class Vertex {
     public int getNumPredecessors() {
         return NumPrececessors;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Vertex)) return false;
+        Vertex vertex = (Vertex) o;
+        return ID == vertex.ID &&
+                Double.compare(vertex.MulvalMetric, MulvalMetric) == 0 &&
+                Objects.equals(Fact, vertex.Fact) &&
+                Objects.equals(Type, vertex.Type);
+    }
+
+    @Override
+    public int hashCode() {
+        return ID;
+    }
 }
