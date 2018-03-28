@@ -20,9 +20,7 @@
  ****************************************************************************************/
 package org.fiware.cybercaptor.server.scoring.types;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class used to represent a graph
@@ -34,9 +32,7 @@ public class Graph {
     /**
      * The arcs of the graph
      */
-    private Arc[] Arcs;
-
-    private Vertex[] Vertices;
+    private Set<Arc> Arcs;
 
     /**
      * The vertices of the graph
@@ -50,9 +46,12 @@ public class Graph {
      * @param vertices the vertices
      */
     public Graph(Arc[] arcs, Vertex[] vertices) {
-        setArcs(arcs);
-        setVertices(vertices);
-        initializeVertexMap();
+        Arcs = new HashSet<>(Arrays.asList(arcs));
+        VertexMap = new HashMap<>();
+        for (Vertex vertex : vertices)
+        {
+            VertexMap.put(vertex.getID(), vertex);
+        }
     }
 
     /**
@@ -61,9 +60,8 @@ public class Graph {
      * @param arcs     the arcs
      * @param vertexMap the vertices
      */
-    public Graph(Arc[] arcs, Vertex[] vertices,  Map<Integer, Vertex> vertexMap) {
+    public Graph(Set<Arc> arcs, Map<Integer, Vertex> vertexMap) {
         Arcs = arcs;
-        Vertices = vertices;
         VertexMap = vertexMap;
     }
 
@@ -165,9 +163,9 @@ public class Graph {
     /**
      * Get arcs.
      *
-     * @return the arc [ ]
+     * @return the arcs
      */
-    public Arc[] getArcs() {
+    public Set<Arc> getArcs() {
         return Arcs;
     }
 
@@ -176,35 +174,9 @@ public class Graph {
      *
      * @param arcs the arcs
      */
-    public void setArcs(Arc[] arcs) {
-        Arcs = arcs;
-    }
-
-    /**
-     * Get vertices.
-     *
-     * @return the vertex [ ]
-     */
-    public Vertex[] getVertices() {
-        return Vertices;
-    }
-
-    /**
-     * Sets vertices.
-     *
-     * @param vertices the vertices
-     */
-    public void setVertices(Vertex[] vertices) {
-        Vertices = vertices;
-    }
-
-    private void initializeVertexMap() {
-        VertexMap = new HashMap<>();
-        for (Vertex vertex : Vertices)
-        {
-            VertexMap.put(vertex.getID(), vertex);
-        }
-    }
+    //public void setArcs(Set<Arc> arcs) {
+    //    Arcs = arcs;
+    //}
 
     public Map<Integer, Vertex> getVertexMap() {
         return VertexMap;

@@ -28,6 +28,8 @@ import org.fiware.cybercaptor.server.scoring.types.Arc;
 import org.fiware.cybercaptor.server.scoring.types.Graph;
 import org.fiware.cybercaptor.server.scoring.types.Vertex;
 
+import java.util.Collection;
+
 /**
  * Class used to store the scoring formulas
  *
@@ -67,9 +69,8 @@ public class ScoringFormulas {
      * @return the gobal score
      */
     public double globalScore(Graph attackPath) {
-        Vertex[] vertices = attackPath.getVertices();
-        Arc[] arcs = attackPath.getArcs();
-        double RiskScore   = riskScore(vertices, arcs);
+        double RiskScore   = riskScore((Vertex[])attackPath.getVertexMap().values().toArray(),
+                (Arc[])attackPath.getArcs().toArray());
         double ImpactScore = impactScore(attackPath);
         return RiskScore + ImpactScore;
     }
@@ -121,8 +122,7 @@ public class ScoringFormulas {
      */
     public double impactScore(Graph attackPath) {
         double impactScore = 0.0;
-        for (int i = 0; i < attackPath.getVertices().length; i++) {
-            Vertex vertex = attackPath.getVertices()[i];
+        for (Vertex vertex : attackPath.getVertexMap().values()) {
             if (vertex.getImpactMetrics() != null) {
                 for (int j = 0; j < vertex.getImpactMetrics().length; j++) {
                     ImpactMetric impactMetric = vertex.getImpactMetrics()[j];
