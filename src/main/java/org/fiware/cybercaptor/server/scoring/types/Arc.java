@@ -97,7 +97,8 @@ public class Arc {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(Source, Destination);
+    public int hashCode()
+    {
+        return (2^15) * Source + Destination;
     }
 }

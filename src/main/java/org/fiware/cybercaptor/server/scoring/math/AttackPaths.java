@@ -148,7 +148,6 @@ public class AttackPaths {
      * @return the merged graph
      */
     private static Graph mergeGraphs(Graph successor, Graph predecessor) {
-        Graph result;
         if (successor == null) {
             return predecessor;
         }
@@ -156,21 +155,13 @@ public class AttackPaths {
             return successor;
         }
 
-        Set<Arc> arcs = predecessor.getArcs();
-        for (Arc arc : successor.getArcs()) {
-            if (!arcs.contains(arc)) {
-                arcs.add(arc);
-            }
-        }
+        Set<Arc>             predecessorArcs      = predecessor.getArcs();
+        Map<Integer, Vertex> predecessorVertexMap = predecessor.getVertexMap();
 
-        Map<Integer, Vertex> vertices = new HashMap<>(predecessor.getVertexMap());
-        for (Vertex vertex : successor.getVertexMap().values() ) {
-            if (!vertices.containsKey(vertex.getID())) {
-                vertices.put(vertex.getID(), vertex);
-            }
-        }
-        result = new Graph(arcs, vertices);
-        return result;
+        predecessorArcs.addAll(successor.getArcs());
+        predecessorVertexMap.putAll(successor.getVertexMap());
+
+        return new Graph(predecessorArcs, predecessorVertexMap);
     }
 
     /**

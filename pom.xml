@@ -102,6 +102,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
+                    <optimize>true</optimize>
                     <encoding>${project.encoding}</encoding>
                     <source>${project.source.version}</source>
                     <target>${project.target.version}</target>
