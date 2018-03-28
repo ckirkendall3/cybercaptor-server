@@ -69,8 +69,10 @@ public class ScoringFormulas {
      * @return the gobal score
      */
     public double globalScore(Graph attackPath) {
-        double RiskScore   = riskScore((Vertex[])attackPath.getVertexMap().values().toArray(),
-                (Arc[])attackPath.getArcs().toArray());
+
+        double RiskScore   = riskScore(
+                attackPath.getVertexMap().values().toArray(new Vertex[attackPath.getVertexMap().size()]),
+                attackPath.getArcs().toArray(new Arc[attackPath.getArcs().size()]));
         double ImpactScore = impactScore(attackPath);
         return RiskScore + ImpactScore;
     }

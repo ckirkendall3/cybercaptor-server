@@ -114,7 +114,7 @@ public class Launch {
         Element root;
         if (AttackPaths != null) {
             for (Graph AttackPathBuffer : AttackPaths) {
-                Arc[] AttackPathArcs = (Arc[]) AttackPathBuffer.getArcs().toArray();
+                Arc[] AttackPathArcs = AttackPathBuffer.getArcs().toArray(new Arc[AttackPathBuffer.getArcs().size()]);
                 Map<Integer, Vertex> AttackPathVertices = AttackPathBuffer.getVertexMap();
                 root = new Element("attack_path");
                 Element scoringElement = new Element("scoring");
