@@ -141,8 +141,12 @@ public class AttackPaths {
                     }
                 }
 
-                for (Graph Buffer : Buffers) {
-                    Result = Graph.mergeGraphs(Result, Buffer);
+                if ( V.getPredecessorsGraph() != null && predecessors.size() == Buffers.size() ) {
+                    Result = V.getPredecessorsGraph();
+                } else {
+                    for (Graph Buffer : Buffers) {
+                        Result = Graph.mergeGraphs(Result, Buffer);
+                    }
                 }
 
                 return Result;

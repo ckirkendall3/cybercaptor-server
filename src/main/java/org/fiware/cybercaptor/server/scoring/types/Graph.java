@@ -241,9 +241,9 @@ public class Graph {
         }
 
         // This is an optimization to see if we can generate successor graphs for inner nodes close to the leaves.
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 3; i++) {
             for (Vertex vertex : VertexMap.values()) {
-                if ( vertex.getPredecessorsGraph() != null ) {
+                if ( vertex.getType().equals(VertexType.LEAF) || vertex.getPredecessorsGraph() != null ) {
                     // Already optimized
                     continue;
                 }
@@ -286,5 +286,4 @@ public class Graph {
             }
         }
     }
-
 }
