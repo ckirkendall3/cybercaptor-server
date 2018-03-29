@@ -45,40 +45,24 @@ public class AttackPathsTest {
     @Test
     public void testMergeGraphs() {
         Graph successor = createGraph(20000, 4000, 0);
-        Graph predecessor = createGraph(20000, 4000, 4000);
+        Graph predecessor = createGraph(10000, 2000, 4000);
 
         long millis = System.currentTimeMillis();
-        for ( int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 10000; i++) {
             Set<Arc> successorArcs = new HashSet<>(successor.getArcs());
             Set<Arc> predecessorArcs = new HashSet<>(predecessor.getArcs());
             Map<Integer, Vertex> successorVertices = new HashMap<>(successor.getVertexMap());
             Map<Integer, Vertex> predecessorVertices = new HashMap<>(predecessor.getVertexMap());
-            Graph.mergeGraphs(
+            Graph.mergeGraphs(Arrays.asList(
                     new Graph(successorArcs, successorVertices),
-                    new Graph(predecessorArcs, predecessorVertices));
-
-        }
-        System.out.print("\nMerge Time: " + (System.currentTimeMillis() - millis));
-
-        successor = createGraph(5000, 1000, 0);
-        predecessor = createGraph(20000, 4000, 1000);
-
-        millis = System.currentTimeMillis();
-        for ( int i = 0; i < 10000; i++) {
-            Set<Arc> successorArcs = new HashSet<>(successor.getArcs());
-            Set<Arc> predecessorArcs = new HashSet<>(predecessor.getArcs());
-            Map<Integer, Vertex> successorVertices = new HashMap<>(successor.getVertexMap());
-            Map<Integer, Vertex> predecessorVertices = new HashMap<>(predecessor.getVertexMap());
-            Graph.mergeGraphs(
-                    new Graph(successorArcs, successorVertices),
-                    new Graph(predecessorArcs, predecessorVertices));
+                    new Graph(predecessorArcs, predecessorVertices)));
 
         }
         System.out.print("\nMerge Time: " + (System.currentTimeMillis() - millis));
     }
 
     private void mergeGraphs(Set<Arc> successorArcs, Set<Vertex> successorVertices,
-                              Set<Arc> predecessorArcs, Set<Vertex> predecessorVertices) {
+                             Set<Arc> predecessorArcs, Set<Vertex> predecessorVertices) {
 
         successorArcs.addAll(predecessorArcs);
         successorVertices.addAll(predecessorVertices);

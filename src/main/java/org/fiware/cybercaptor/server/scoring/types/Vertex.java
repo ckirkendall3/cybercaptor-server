@@ -68,6 +68,11 @@ public class Vertex {
     private Graph PredecessorsGraph = null;
 
     /**
+     * Map of atomic maps to all this vertices predecessors.
+     */
+    private Map<Integer, Graph> PredecessorAtomicGraphs = new HashMap<>();
+
+    /**
      * The vertex impact metrics
      */
     private ImpactMetric[] ImpactMetrics = null;
@@ -214,5 +219,13 @@ public class Vertex {
 
     public void setPredecessorsGraph(Graph predecessorsGraph) {
         PredecessorsGraph = predecessorsGraph;
+    }
+
+    public Map<Integer, Graph> getPredecessorAtomicGraphs() {
+        return PredecessorAtomicGraphs;
+    }
+
+    public void addPredecessorAtomicGraph(int id, Graph graph) {
+        PredecessorAtomicGraphs.put(id, graph);
     }
 }

@@ -45,7 +45,7 @@ public class AttackPaths {
         if (Targets != null) {
             AttackGraph.preProcessGraph();
             Graph[] GraphTable = new Graph[Targets.length];
-            Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath2(Targets[i], new HashSet<>(), AttackGraph));
+            Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath2(Targets[i], new HashSet<>(Collections.singletonList(1))));
             return GraphTable;
         } else {
             return null;
@@ -57,23 +57,23 @@ public class AttackPaths {
      *
      * @param V         the starting vertex
      * @param Forbidden the list of forbidden vertices
-     * @param graph     the attack graph
      * @return the created attack path
      */
-    private static Graph exploreAttackPath2(Vertex V, Set<Integer> Forbidden, Graph graph) {
+    private static Graph exploreAttackPath2(Vertex V, Set<Integer> Forbidden) {
         Graph Result = null;
 
         // Must reset the reference so we don't modify the incoming map
         Forbidden = new HashSet<>(Forbidden);
 
         List<Vertex> predecessors = V.getPredecessors();
+        List<Graph> Buffers = new ArrayList<>();
+        List<Graph> AtomicBuffers = new ArrayList<>();
         switch (V.getType()) {
             case AND: {
                 if (checkForbidden(predecessors, Forbidden)) {
                     return null;
                 }
                 Result = V.getPredecessorsGraph();
-                List<Graph> Buffers = new ArrayList<>();
                 for (Vertex D : predecessors) {
                     switch (D.getType()) {
                         case LEAF:
@@ -81,30 +81,20 @@ public class AttackPaths {
                             break;
 
                         case OR:
-                            Forbidden.add(D.getID());
-                            Graph parentRes = exploreAttackPath2(D, Forbidden, graph);
+                            Graph parentRes = exploreAttackPath2(D, Forbidden);
 
                             //One parent of the AND is missing -> Delete the whole branch
                             if (parentRes == null) {
                                 return null;
                             } else {
-                                Graph BufferGraph = D.getSuccessorGraphs().get(V.getID());
-
-                                if (BufferGraph == null) {
-                                    BufferGraph = Graph.mergeGraphs(Graph.createAtomicGraph(V, D), parentRes);
-                                }
-                                Buffers.add(BufferGraph);
+                                AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                                Buffers.add(parentRes);
                             }
                             break;
 
                         case AND:
+                            // should never happen with pre-opt
                             break;
-
-                    }
-                }
-                if (Result == null) {
-                    for (Graph Buffer : Buffers) {
-                        Result = Graph.mergeGraphs(Result, Buffer);
                     }
                 }
 
@@ -112,7 +102,6 @@ public class AttackPaths {
             }
 
             case OR: {
-                List<Graph> Buffers = new ArrayList<>();
                 for (Vertex D : predecessors) {
                     switch (D.getType()) {
                         case LEAF:
@@ -120,43 +109,43 @@ public class AttackPaths {
                             break;
 
                         case AND:
-                            if (Forbidden.isEmpty()) {
-                                Forbidden.add(V.getID());
-                            }
-                            Graph parentRes = exploreAttackPath2(D, Forbidden, graph);
+                            Graph parentRes = exploreAttackPath2(D, Forbidden);
 
                             //One parent of the AND is missing -> Delete the whole branch
                             if (parentRes != null) {
                                 Graph BufferGraph = D.getSuccessorGraphs().get(V.getID());
 
                                 if (BufferGraph == null) {
-                                    BufferGraph = Graph.mergeGraphs(Graph.createAtomicGraph(V, D), parentRes);
+                                    BufferGraph = parentRes;
+                                    AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
                                 }
                                 Buffers.add(BufferGraph);
                             }
                             break;
 
                         case OR:
+                            // Should never happen with pre-opt
                             break;
                     }
                 }
 
-                if ( V.getPredecessorsGraph() != null && predecessors.size() == Buffers.size() ) {
+                if (V.getPredecessorsGraph() != null && (predecessors.size()) == Buffers.size()) {
                     Result = V.getPredecessorsGraph();
-                } else {
-                    for (Graph Buffer : Buffers) {
-                        Result = Graph.mergeGraphs(Result, Buffer);
-                    }
                 }
-
-                return Result;
             }
 
             case LEAF:
                 break;
         }
 
-        return null;
+        if (Result == null) {
+            if (!Buffers.isEmpty() || !AtomicBuffers.isEmpty() ) {
+                Buffers.addAll(AtomicBuffers);
+                Result = Graph.mergeGraphs(Buffers);
+            }
+        }
+
+        return Result;
     }
 
     /**
@@ -168,8 +157,12 @@ public class AttackPaths {
      */
     private static boolean checkForbidden(List<Vertex> vertices, Set<Integer> forbidden) {
         for (Vertex vertex : vertices) {
-            if (vertex.getType().equals(VertexType.OR) && forbidden.contains(vertex.getID())) {
-                return true;
+            if (vertex.getType().equals(VertexType.OR)) {
+                if (forbidden.contains(vertex.getID())) {
+                    return true;
+                } else {
+                    forbidden.add(vertex.getID());
+                }
             }
         }
         return false;
