@@ -187,8 +187,10 @@ public class Graph {
         Map<Integer, Vertex> vertices = new HashMap<>();
 
         for ( Graph graph : graphs ) {
-            arcs.addAll(graph.getArcs());
-            vertices.putAll(graph.getVertexMap());
+            if ( graph != null ) {
+                arcs.addAll(graph.getArcs());
+                vertices.putAll(graph.getVertexMap());
+            }
         }
 
         return new Graph(arcs, vertices);
