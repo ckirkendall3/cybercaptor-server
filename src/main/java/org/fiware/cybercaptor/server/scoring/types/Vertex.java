@@ -48,9 +48,9 @@ public class Vertex {
     private double MulvalMetric;
 
     /**
-     * The vertex type
+     * The vertex type enum
      */
-    private String Type;
+    private VertexType Type;
 
     /**
      * The vertex predecessor set
@@ -58,9 +58,14 @@ public class Vertex {
     private List<Vertex> Predecessors = new ArrayList<>();
 
     /**
-     * The number of predecessors (optimized for performance)
+     * Graphs by successors
      */
-    private int NumPrececessors = 0;
+    private Map<Integer, Graph> SuccessorGraphs = new HashMap<>();
+
+    /**
+     * Graph of predecessors
+     */
+    private Graph PredecessorsGraph = null;
 
     /**
      * The vertex impact metrics
@@ -75,7 +80,7 @@ public class Vertex {
      * @param metric the metric
      * @param type   the type
      */
-    public Vertex(int id, String fact, double metric, String type) {
+    public Vertex(int id, String fact, double metric, VertexType type) {
         ID = id;
         Fact = fact;
         MulvalMetric = metric;
@@ -148,21 +153,22 @@ public class Vertex {
         MulvalMetric = metric;
     }
 
+
     /**
-     * Gets type.
+     * Gets type enum.
      *
-     * @return the type
+     * @return the type enum
      */
-    public String getType() {
+    public VertexType getType() {
         return Type;
     }
 
     /**
-     * Sets type.
+     * Sets type enum.
      *
-     * @param type the type
+     * @param type the type enum
      */
-    public void setType(String type) {
+    public void setType(VertexType type) {
         Type = type;
     }
 
@@ -190,17 +196,23 @@ public class Vertex {
         return Predecessors;
     }
 
-    public void setPredecessors(List<Vertex> predecessors) {
-        Predecessors = predecessors;
-        NumPrececessors = Predecessors.size();
-    }
-
     public void addPredecessor(Vertex vertex) {
         Predecessors.add(vertex);
-        NumPrececessors++;
     }
 
-    public int getNumPredecessors() {
-        return NumPrececessors;
+    public Map<Integer, Graph> getSuccessorGraphs() {
+        return SuccessorGraphs;
+    }
+
+    public void addSuccessorGraph(int successorId, Graph graph) {
+        SuccessorGraphs.put(successorId, graph);
+    }
+
+    public Graph getPredecessorsGraph() {
+        return PredecessorsGraph;
+    }
+
+    public void setPredecessorsGraph(Graph predecessorsGraph) {
+        PredecessorsGraph = predecessorsGraph;
     }
 }

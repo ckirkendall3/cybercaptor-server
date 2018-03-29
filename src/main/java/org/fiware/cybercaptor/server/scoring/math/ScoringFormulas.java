@@ -27,6 +27,7 @@ import org.fiware.cybercaptor.server.attackgraph.ImpactMetric;
 import org.fiware.cybercaptor.server.scoring.types.Arc;
 import org.fiware.cybercaptor.server.scoring.types.Graph;
 import org.fiware.cybercaptor.server.scoring.types.Vertex;
+import org.fiware.cybercaptor.server.scoring.types.VertexType;
 
 import java.util.Collection;
 
@@ -86,9 +87,9 @@ public class ScoringFormulas {
      */
     public double riskScore(Vertex[] vertices, Arc[] arcs) {
         double   riskScore = 0.0;
-        Vertex[] andVertices     = Graph.getVerticesOnType(vertices, "AND");
-        Vertex[] orVertices      = Graph.getVerticesOnType(vertices, "OR");
-        Vertex[] leafVertices    = Graph.getVerticesOnType(vertices, "LEAF");
+        Vertex[] andVertices     = Graph.getVerticesOnType(vertices, VertexType.AND);
+        Vertex[] orVertices      = Graph.getVerticesOnType(vertices, VertexType.OR);
+        Vertex[] leafVertices    = Graph.getVerticesOnType(vertices, VertexType.LEAF);
 
         int andVertexCount  = andVertices  != null ? andVertices.length  : 0;
         int orVertexCount   = orVertices   != null ? orVertices.length   : 0;

@@ -27,6 +27,7 @@ import org.fiware.cybercaptor.server.scoring.math.ScoringFormulas;
 import org.fiware.cybercaptor.server.scoring.types.Arc;
 import org.fiware.cybercaptor.server.scoring.types.Graph;
 import org.fiware.cybercaptor.server.scoring.types.Vertex;
+import org.fiware.cybercaptor.server.scoring.types.VertexType;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -81,15 +82,15 @@ public class Launch {
             ArcsTable[i].setDestination(arcDstTable[i]);
         }
         for (int i = 0; i < vertexIDTable.length; i++) {
-            VerticesTable[i] = new Vertex(-1, "EOF", -1, "EOF");
+            VerticesTable[i] = new Vertex(-1, "EOF", -1, VertexType.LEAF);
             VerticesTable[i].setID(vertexIDTable[i]);
             VerticesTable[i].setFact(vertexFactTable[i]);
             VerticesTable[i].setMulvalMetric(vertexMulvalMetricTable[i]);
-            VerticesTable[i].setType(vertexTypeTable[i]);
+            VerticesTable[i].setType(VertexType.valueOf(vertexTypeTable[i]));
             VerticesTable[i].setImpactMetrics(ImpactMetrics[i]);
         }
         Graph graph = new Graph(ArcsTable, VerticesTable);
-        Vertex[] TargetSet = Graph.getVerticesOnTypeAndFact(VerticesTable, "OR");
+        Vertex[] TargetSet = Graph.getVerticesOnTypeAndFact(VerticesTable, VertexType.OR);
 
         System.out.println("Generate Attack Paths");
         Graph[] result = AttackPaths.main(TargetSet, graph); //Disabled following the test launch of attack path algorithm.

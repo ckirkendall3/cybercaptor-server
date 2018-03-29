@@ -20,9 +20,9 @@
  ****************************************************************************************/
 package org.fiware.cybercaptor.server.scoring.math;
 
-import org.fiware.cybercaptor.server.scoring.types.Arc;
 import org.fiware.cybercaptor.server.scoring.types.Graph;
 import org.fiware.cybercaptor.server.scoring.types.Vertex;
+import org.fiware.cybercaptor.server.scoring.types.VertexType;
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ public class AttackPaths {
     public static Graph[] main(Vertex[] Targets, Graph AttackGraph) {
 
         if (Targets != null) {
-            AttackGraph.getPredecessors();
+            AttackGraph.preProcessGraph();
             Graph[] GraphTable = new Graph[Targets.length];
             Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath2(Targets[i], new HashSet<>(), AttackGraph));
             return GraphTable;
@@ -61,122 +61,114 @@ public class AttackPaths {
      * @return the created attack path
      */
     private static Graph exploreAttackPath2(Vertex V, Set<Integer> Forbidden, Graph graph) {
-        Vertex LEAFVertex = new Vertex(0, "", 0.0, "LEAF");
-        Vertex ORVertex = new Vertex(0, "", 0.0, "OR");
-        Vertex ANDVertex = new Vertex(0, "", 0.0, "AND");
         Graph Result = null;
 
         // Must reset the reference so we don't modify the incoming map
         Forbidden = new HashSet<>(Forbidden);
 
         List<Vertex> predecessors = V.getPredecessors();
-        if (V.getType().equals(ANDVertex.getType())) {
-            if (predecessors != null) {
+        switch (V.getType()) {
+            case AND: {
+                if (checkForbidden(predecessors, Forbidden)) {
+                    return null;
+                }
+                Result = V.getPredecessorsGraph();
                 List<Graph> Buffers = new ArrayList<>();
                 for (Vertex D : predecessors) {
-                    if (D != null) {
-                        if (D.getType().equals(LEAFVertex.getType())) {
-                            Buffers.add(createAtomicGraph(V, D));
-                        } else if (D.getType().equals(ORVertex.getType())) {
-                            if (!Forbidden.contains(D.getID())) {
-                                if (Forbidden.isEmpty()) {
-                                    Forbidden.add(D.getID());
-                                } else {
-                                    Forbidden.add(D.getID());
-                                }
-                                Graph BufferGraph = createAtomicGraph(V, D);
-                                Graph parentRes = exploreAttackPath2(D, Forbidden, graph);
+                    switch (D.getType()) {
+                        case LEAF:
+                            Buffers.add(D.getSuccessorGraphs().get(V.getID()));
+                            break;
 
-                                //One parent of the AND is missing -> Delete the whole branch
-                                if (parentRes == null) {
-                                    return null;
-                                } else {
-                                    Buffers.add(mergeGraphs(BufferGraph, parentRes));
-                                }
-                            } else {
+                        case OR:
+                            Forbidden.add(D.getID());
+                            Graph parentRes = exploreAttackPath2(D, Forbidden, graph);
+
+                            //One parent of the AND is missing -> Delete the whole branch
+                            if (parentRes == null) {
                                 return null;
+                            } else {
+                                Graph BufferGraph = D.getSuccessorGraphs().get(V.getID());
+
+                                if (BufferGraph == null) {
+                                    BufferGraph = Graph.mergeGraphs(Graph.createAtomicGraph(V, D), parentRes);
+                                }
+                                Buffers.add(BufferGraph);
                             }
-                        }
+                            break;
+
+                        case AND:
+                            break;
+
                     }
                 }
-                for (Graph Buffer1 : Buffers) {
-                    if (Buffer1 == null) {
-                        return null;
+                if (Result == null) {
+                    for (Graph Buffer : Buffers) {
+                        Result = Graph.mergeGraphs(Result, Buffer);
                     }
                 }
-                for (Graph Buffer : Buffers) {
-                    Result = mergeGraphs(Result, Buffer);
-                }
+
+                return Result;
             }
-            return Result;
-        }
-        if (V.getType().equals(ORVertex.getType())) {
-            if ( Forbidden.isEmpty() ) {
-                Forbidden.add(V.getID());
-            }
-            if (predecessors != null) {
-                Graph Buffer = null;
-                boolean atLeastOnePath = false;
+
+            case OR: {
+                List<Graph> Buffers = new ArrayList<>();
                 for (Vertex D : predecessors) {
-                    if (D != null) {
-                        if (D.getType().equals(LEAFVertex.getType())) {
-                            Buffer = mergeGraphs(Buffer, createAtomicGraph(V, D));
-                            atLeastOnePath = true;
-                        } else if (D.getType().equals(ANDVertex.getType())) {
-                            Graph TempBuffer = exploreAttackPath2(D, Forbidden, graph);
-                            if (TempBuffer != null) {
-                                Buffer = mergeGraphs(Buffer, mergeGraphs(createAtomicGraph(V, D), TempBuffer));
-                                atLeastOnePath = true;
+                    switch (D.getType()) {
+                        case LEAF:
+                            Buffers.add(D.getSuccessorGraphs().get(V.getID()));
+                            break;
+
+                        case AND:
+                            if (Forbidden.isEmpty()) {
+                                Forbidden.add(V.getID());
                             }
-                        }
+                            Graph parentRes = exploreAttackPath2(D, Forbidden, graph);
+
+                            //One parent of the AND is missing -> Delete the whole branch
+                            if (parentRes != null) {
+                                Graph BufferGraph = D.getSuccessorGraphs().get(V.getID());
+
+                                if (BufferGraph == null) {
+                                    BufferGraph = Graph.mergeGraphs(Graph.createAtomicGraph(V, D), parentRes);
+                                }
+                                Buffers.add(BufferGraph);
+                            }
+                            break;
+
+                        case OR:
+                            break;
                     }
                 }
-                if (!atLeastOnePath) {
-                    return null;
-                } else
-                    return Buffer;
+
+                for (Graph Buffer : Buffers) {
+                    Result = Graph.mergeGraphs(Result, Buffer);
+                }
+
+                return Result;
             }
+
+            case LEAF:
+                break;
         }
+
         return null;
     }
 
     /**
-     * Merge two graphs in a new graph
+     * Check the forbidden set for any of the vertices
      *
-     * @param successor   the first graph
-     * @param predecessor the secon graph
-     * @return the merged graph
+     * @param vertices  Vertices to check
+     * @param forbidden Set of forbidden ids
+     * @return true if there is a forbidden vertex
      */
-    private static Graph mergeGraphs(Graph successor, Graph predecessor) {
-        if (successor == null) {
-            return predecessor;
+    private static boolean checkForbidden(List<Vertex> vertices, Set<Integer> forbidden) {
+        for (Vertex vertex : vertices) {
+            if (vertex.getType().equals(VertexType.OR) && forbidden.contains(vertex.getID())) {
+                return true;
+            }
         }
-        if (predecessor == null) {
-            return successor;
-        }
-
-        Set<Arc>             predecessorArcs      = predecessor.getArcs();
-        Map<Integer, Vertex> predecessorVertexMap = predecessor.getVertexMap();
-
-        predecessorArcs.addAll(successor.getArcs());
-        predecessorVertexMap.putAll(successor.getVertexMap());
-
-        return new Graph(predecessorArcs, predecessorVertexMap);
+        return false;
     }
 
-    /**
-     * Create an atomic graph from two vertices
-     *
-     * @param V a vertex
-     * @param D a vertex
-     * @return the new graph
-     */
-    private static Graph createAtomicGraph(Vertex V, Vertex D) {
-        Map<Integer, Vertex> vertices = new HashMap<>();
-        vertices.put(V.getID(), V);
-        vertices.put(D.getID(), D);
-        Set<Arc> arcs = new HashSet<>();
-        arcs.add(new Arc(V.getID(), D.getID()));
-        return new Graph(arcs, vertices);
-    }
 }

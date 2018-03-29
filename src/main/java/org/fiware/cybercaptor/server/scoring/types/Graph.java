@@ -72,7 +72,7 @@ public class Graph {
      * @param type     the type
      * @return the vertex [ ]
      */
-    public static Vertex[] getVerticesOnTypeAndFact(Vertex[] vertices, String type) {
+    public static Vertex[] getVerticesOnTypeAndFact(Vertex[] vertices, VertexType type) {
         int counter = 0;
         Vertex[] result = null;
         //the first for loop is to get the cardinality of the query result
@@ -137,7 +137,7 @@ public class Graph {
      * @param type     the type
      * @return the vertex [ ]
      */
-    public static Vertex[] getVerticesOnType(Vertex[] vertices, String type) {
+    public static Vertex[] getVerticesOnType(Vertex[] vertices, VertexType type) {
         int counter = 0;
         Vertex[] result = null;
         //the first for loop is to get the cardinality of the query result
@@ -161,6 +161,54 @@ public class Graph {
     }
 
     /**
+     * Create an atomic graph from two vertices
+     *
+     * @param V a vertex
+     * @param D a vertex
+     * @return the new graph
+     */
+    public static Graph createAtomicGraph(Vertex V, Vertex D) {
+        Map<Integer, Vertex> vertices = new HashMap<>();
+        vertices.put(V.getID(), V);
+        vertices.put(D.getID(), D);
+        Set<Arc> arcs = new HashSet<>();
+        arcs.add(new Arc(V.getID(), D.getID()));
+        return new Graph(arcs, vertices);
+    }
+
+    /**
+     * Merge two graphs in a new graph
+     *
+     * @param successor   the first graph
+     * @param predecessor the secon graph
+     * @return the merged graph
+     */
+    public static Graph mergeGraphs(Graph successor, Graph predecessor) {
+        if (successor == null) {
+            return predecessor;
+        }
+        if (predecessor == null) {
+            return successor;
+        }
+
+        Set<Arc> arcs;
+        Map<Integer, Vertex> vertices;
+        if ( successor.getVertexMap().size() > predecessor.getVertexMap().size()) {
+            arcs = new HashSet<>(successor.getArcs());
+            arcs.addAll(predecessor.getArcs());
+            vertices = new HashMap<>(successor.getVertexMap());
+            vertices.putAll(predecessor.getVertexMap());
+        } else {
+            arcs = new HashSet<>(predecessor.getArcs());
+            arcs.addAll(successor.getArcs());
+            vertices = new HashMap<>(predecessor.getVertexMap());
+            vertices.putAll(successor.getVertexMap());
+        }
+
+        return new Graph(arcs, vertices);
+    }
+
+    /**
      * Get arcs.
      *
      * @return the arcs
@@ -169,14 +217,6 @@ public class Graph {
         return Arcs;
     }
 
-    /**
-     * Sets arcs.
-     *
-     * @param arcs the arcs
-     */
-    //public void setArcs(Set<Arc> arcs) {
-    //    Arcs = arcs;
-    //}
 
     public Map<Integer, Vertex> getVertexMap() {
         return VertexMap;
@@ -184,12 +224,66 @@ public class Graph {
 
     /**
      * Loops through all the arcs and configures the predecessors for all the
-     * vertices.
+     * vertices and generates the graphs for nodes close to the edges (LEAF).
      */
-    public void getPredecessors() {
-        //the first for loop is to get the cardinality of the query result
+    public void preProcessGraph() {
+
         for (Arc arc : Arcs) {
-            VertexMap.get(arc.getSource()).addPredecessor(VertexMap.get(arc.getDestination()));
+            Vertex source = VertexMap.get(arc.getSource());
+            Vertex destination = VertexMap.get(arc.getDestination());
+
+            source.addPredecessor(destination);
+
+            // Create the successor graphs for the leaf nodes for optimization
+            if (destination.getType().equals(VertexType.LEAF)) {
+                destination.addSuccessorGraph(source.getID(), createAtomicGraph(source, destination));
+            }
+        }
+
+        // This is an optimization to see if we can generate successor graphs for inner nodes close to the leaves.
+        for (int i = 0; i < 2; i++) {
+            for (Vertex vertex : VertexMap.values()) {
+                if ( vertex.getPredecessorsGraph() != null ) {
+                    // Already optimized
+                    continue;
+                }
+
+                // Walk through the predecessors and see if they all have successor graphs for this node.
+                boolean complete = true;
+                List<Graph> childGraphs = new ArrayList<>();
+                for (Vertex predecessor : vertex.getPredecessors()) {
+                    Map<Integer, Graph> predecessorSuccessorGraphs = predecessor.getSuccessorGraphs();
+                    Graph predecessorsGraph = predecessor.getPredecessorsGraph();
+
+                    if ( predecessorsGraph != null ) {
+                        if ( predecessorSuccessorGraphs.containsKey(vertex.getID()) ) {
+                            continue;
+                        }
+
+                        Graph successorGraph = mergeGraphs(createAtomicGraph(vertex, predecessor), predecessorsGraph);
+
+                        // Add successor graph to the predecessors
+                        predecessorSuccessorGraphs.put(vertex.getID(), successorGraph);
+                        childGraphs.add(successorGraph);
+                    } else {
+                        Graph successorGraph = predecessorSuccessorGraphs.get(vertex.getID());
+                        if ( successorGraph == null ) {
+                            complete = false;
+                        } else {
+                            childGraphs.add(successorGraph);
+                        }
+                    }
+                }
+
+                if (complete) {
+                    // Merge all the success graphs together.
+                    Graph predecessorsGraph = null;
+                    for ( Graph graph : childGraphs ) {
+                        predecessorsGraph = mergeGraphs(predecessorsGraph, graph);
+                    }
+                    vertex.setPredecessorsGraph(predecessorsGraph);
+                }
+            }
         }
     }
 
