@@ -231,6 +231,8 @@ public class Graph {
                 if (destination.getType().equals(VertexType.LEAF)) {
                     destination.addSuccessorGraph(source.getID(), atomicGraph);
                 }
+            } else {
+                System.out.println(source.getID() + ":" + source.getType().toString() + " - " + destination.getID());
             }
         }
 

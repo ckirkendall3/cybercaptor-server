@@ -81,7 +81,6 @@ public class AttackPaths {
                             break;
 
                         case OR:
-                            Forbidden.add(D.getID());
                             Graph parentRes = exploreAttackPath2(D, Forbidden);
 
                             //One parent of the AND is missing -> Delete the whole branch
@@ -98,9 +97,8 @@ public class AttackPaths {
                             break;
                     }
                 }
-
-                return Result;
             }
+            break;
 
             case OR: {
                 for (Vertex D : predecessors) {
@@ -134,6 +132,7 @@ public class AttackPaths {
                     Result = V.getPredecessorsGraph();
                 }
             }
+            break;
 
             case LEAF:
                 break;
@@ -162,9 +161,9 @@ public class AttackPaths {
                 if (forbidden.contains(vertex.getID())) {
                     return true;
                 }
-                //else {
-                //    forbidden.add(vertex.getID());
-                //}
+                else {
+                    forbidden.add(vertex.getID());
+                }
             }
         }
         return false;
