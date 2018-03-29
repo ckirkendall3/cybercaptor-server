@@ -81,6 +81,7 @@ public class AttackPaths {
                             break;
 
                         case OR:
+                            Forbidden.add(D.getID());
                             Graph parentRes = exploreAttackPath2(D, Forbidden);
 
                             //One parent of the AND is missing -> Delete the whole branch
@@ -129,7 +130,7 @@ public class AttackPaths {
                     }
                 }
 
-                if (V.getPredecessorsGraph() != null && (predecessors.size()) == Buffers.size()) {
+                if (V.getPredecessorsGraph() != null && predecessors.size() == Buffers.size()) {
                     Result = V.getPredecessorsGraph();
                 }
             }
@@ -160,9 +161,10 @@ public class AttackPaths {
             if (vertex.getType().equals(VertexType.OR)) {
                 if (forbidden.contains(vertex.getID())) {
                     return true;
-                } else {
-                    forbidden.add(vertex.getID());
                 }
+                //else {
+                //    forbidden.add(vertex.getID());
+                //}
             }
         }
         return false;
