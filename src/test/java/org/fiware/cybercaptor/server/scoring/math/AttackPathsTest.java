@@ -28,22 +28,22 @@ public class AttackPathsTest {
      */
     @Test
     public void testAttackGraphEval() throws Exception {
-        String path =
-                Paths.get(this.getClass().getClassLoader().getResource("AttackGraph.xml").toURI()).toFile().getAbsolutePath();
-
-        System.out.println(System.currentTimeMillis() + ": Loading mulval attack graph from file");
-        MulvalAttackGraph mulvalAttackGraph = new MulvalAttackGraph();
-        mulvalAttackGraph.loadFromFile(path);
-
         long startMillis = System.nanoTime();
-        int loopCount = 1;
+        int loopCount = 2;
         for (int loop = 0; loop < loopCount; loop++ ) {
+            String path =
+                    Paths.get(this.getClass().getClassLoader().getResource("AttackGraph.xml").toURI()).toFile().getAbsolutePath();
 
+            //System.out.println(System.currentTimeMillis() + ": Loading mulval attack graph from file");
+            MulvalAttackGraph mulvalAttackGraph = new MulvalAttackGraph();
+            mulvalAttackGraph.loadFromFile(path);
+
+            System.out.println(System.currentTimeMillis() + " (NEW): Start attack path generation");
             Arc[] ArcsTable = new Arc[mulvalAttackGraph.arcs.size()];
             Vertex[] VerticesTable = new Vertex[mulvalAttackGraph.getNumberOfVertices()];
 
             int i = 0;
-            System.out.println(System.currentTimeMillis() + ": Setup attack path graph");
+            //System.out.println(System.currentTimeMillis() + ": Setup attack path graph");
             for (Integer key : mulvalAttackGraph.vertices.keySet()) {
                 org.fiware.cybercaptor.server.attackgraph.Vertex vertex = mulvalAttackGraph.vertices.get(key);
                 VerticesTable[i] = new Vertex(-1, "EOF", -1, VertexType.LEAF);
@@ -69,16 +69,93 @@ public class AttackPathsTest {
             Graph graph = new Graph(ArcsTable, VerticesTable);
             Vertex[] TargetSet = Graph.getVerticesOnTypeAndFact(VerticesTable, VertexType.OR);
 
-            System.out.println(System.currentTimeMillis() + ": Generate Attack Paths");
+            //System.out.println(System.currentTimeMillis() + ": Generate Attack Paths");
             Graph[] result = AttackPaths.main(TargetSet, graph); //Disabled following the test launch of attack path algorithm.
 
-            System.out.println(System.currentTimeMillis() + ": Scoring Attack Paths");
+            //System.out.println(System.currentTimeMillis() + ": Scoring Attack Paths");
             ScoringFormulas formulas = new ScoringFormulas();
-            double scoreAttackGraph = formulas.MinMax(formulas.globalScore(graph), 0);
+            double scoreAttackGraph = formulas.MinMax(formulas.globalScore(graph), 1);
+            //System.out.println(System.currentTimeMillis() + ": Attack path score: " + scoreAttackGraph);
+
+            int count = 0;
+            for (Graph attackPath : result) {
+                if ( attackPath.getVertexMap().size() > 3) {
+                    count++;
+                }
+                //System.out.println(System.currentTimeMillis() + ": AttackPath(arcs:" + attackPath.getArcs().size() +
+                //        ", vertices:" + attackPath.getVertexMap().size() + ")");
+            }
+            System.out.println(System.currentTimeMillis() + " (NEW): Number of attack paths - " + count);
+        }
+        System.out.println("(NEW) Total time with " + loopCount + " loops: " + (System.nanoTime() - startMillis));
+    }
+
+    /**
+     * Test attack graph evaluation
+     */
+    @Test
+    public void testAttackGraphEval2() throws Exception {
+        long startMillis = System.nanoTime();
+        int loopCount = 2;
+        for (int loop = 0; loop < loopCount; loop++ ) {
+            String path =
+                    Paths.get(this.getClass().getClassLoader().getResource("AttackGraph.xml").toURI()).toFile().getAbsolutePath();
+
+            //System.out.println(System.currentTimeMillis() + ": Loading mulval attack graph from file");
+            MulvalAttackGraph mulvalAttackGraph = new MulvalAttackGraph();
+            mulvalAttackGraph.loadFromFile(path);
+
+            System.out.println(System.currentTimeMillis() + ": Start attack path generation");
+            Arc[] ArcsTable = new Arc[mulvalAttackGraph.arcs.size()];
+            Vertex[] VerticesTable = new Vertex[mulvalAttackGraph.getNumberOfVertices()];
+
+            int i = 0;
+            //System.out.println(System.currentTimeMillis() + ": Setup attack path graph");
+            for (Integer key : mulvalAttackGraph.vertices.keySet()) {
+                org.fiware.cybercaptor.server.attackgraph.Vertex vertex = mulvalAttackGraph.vertices.get(key);
+                VerticesTable[i] = new Vertex(-1, "EOF", -1, VertexType.LEAF);
+                VerticesTable[i].setID(vertex.id);
+                VerticesTable[i].setFact(vertex.fact.factString);
+                VerticesTable[i].setMulvalMetric(vertex.mulvalMetric);
+                VerticesTable[i].setType(VertexType.valueOf(vertex.type.toString().toUpperCase()));
+                ImpactMetric[] impactMetrics = new ImpactMetric[vertex.impactMetrics.size()];
+                for (int j = 0; j < vertex.impactMetrics.size(); j++) {
+                    impactMetrics[j] = vertex.impactMetrics.get(j);
+                }
+                VerticesTable[i].setImpactMetrics(impactMetrics);
+                i++;
+            }
+
+            for (int j = 0; j < mulvalAttackGraph.arcs.size(); j++) {
+                org.fiware.cybercaptor.server.attackgraph.Arc arc = mulvalAttackGraph.arcs.get(j);
+                ArcsTable[j] = new Arc(-1, -1);
+                ArcsTable[j].setSource(arc.destination.id);
+                ArcsTable[j].setDestination(arc.source.id);
+            }
+
+            Graph graph = new Graph(ArcsTable, VerticesTable);
+            Vertex[] TargetSet = Graph.getVerticesOnTypeAndFact(VerticesTable, VertexType.OR);
+
+            //System.out.println(System.currentTimeMillis() + ": Generate Attack Paths");
+            Graph[] result = AttackPaths.main2(TargetSet, graph); //Disabled following the test launch of attack path algorithm.
+
+            //System.out.println(System.currentTimeMillis() + ": Scoring Attack Paths");
+            ScoringFormulas formulas = new ScoringFormulas();
+            double scoreAttackGraph = formulas.MinMax(formulas.globalScore(graph), 1);
+            //System.out.println(System.currentTimeMillis() + ": Attack path score: " + scoreAttackGraph);
+
+            int count = 0;
+            for (Graph attackPath : result) {
+                if ( attackPath.getVertexMap().size() > 3) {
+                    count++;
+                }
+                //System.out.println(System.currentTimeMillis() + ": AttackPath(arcs:" + attackPath.getArcs().size() +
+                //", vertices:" + attackPath.getVertexMap().size() + ")");
+            }
+            System.out.println(System.currentTimeMillis() + ": Number of attack paths - " + count);
         }
         System.out.println("Total time with " + loopCount + " loops: " + (System.nanoTime() - startMillis));
     }
-
     /**
      * Test merging.
      */
