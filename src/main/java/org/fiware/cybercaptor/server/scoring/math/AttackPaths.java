@@ -43,7 +43,9 @@ public class AttackPaths {
     public static Graph[] main(Vertex[] Targets, Graph AttackGraph) {
 
         if (Targets != null) {
+            System.out.println(System.currentTimeMillis() + ": Preprocessing Graph");
             AttackGraph.preProcessGraph();
+            System.out.println(System.currentTimeMillis() + ": Exploring Attack Paths");
             Graph[] GraphTable = new Graph[Targets.length];
             Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath2(Targets[i], new HashSet<>(Collections.singletonList(1))));
             return GraphTable;
@@ -139,7 +141,7 @@ public class AttackPaths {
         }
 
         if (Result == null) {
-            if (!Buffers.isEmpty() || !AtomicBuffers.isEmpty() ) {
+            if (!Buffers.isEmpty()) {
                 Buffers.addAll(AtomicBuffers);
                 Result = Graph.mergeGraphs(Buffers);
             }
