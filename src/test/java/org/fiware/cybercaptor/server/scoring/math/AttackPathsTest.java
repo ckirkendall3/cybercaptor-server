@@ -32,7 +32,7 @@ public class AttackPathsTest {
         long startMillis = System.nanoTime();
         for (int loop = 0; loop < loopCount; loop++ ) {
             String path =
-                    Paths.get(this.getClass().getClassLoader().getResource("AttackGraph.xml").toURI()).toFile().getAbsolutePath();
+                    Paths.get(this.getClass().getClassLoader().getResource("AttackGraph2.xml").toURI()).toFile().getAbsolutePath();
 
             //System.out.println(System.currentTimeMillis() + ": Loading mulval attack graph from file");
             MulvalAttackGraph mulvalAttackGraph = new MulvalAttackGraph();
@@ -168,9 +168,9 @@ public class AttackPathsTest {
             Set<Arc> predecessorArcs = new HashSet<>(predecessor.getArcs());
             Map<Integer, Vertex> successorVertices = new HashMap<>(successor.getVertexMap());
             Map<Integer, Vertex> predecessorVertices = new HashMap<>(predecessor.getVertexMap());
-            Graph.mergeGraphs(Arrays.asList(
+            Graph.mergeGraphs(new HashSet(Arrays.asList(
                     new Graph(successorArcs, successorVertices),
-                    new Graph(predecessorArcs, predecessorVertices)));
+                    new Graph(predecessorArcs, predecessorVertices))));
 
         }
         System.out.print("\nMerge Time: " + (System.currentTimeMillis() - millis));

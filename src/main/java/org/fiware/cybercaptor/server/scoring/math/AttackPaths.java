@@ -76,10 +76,12 @@ public class AttackPaths {
     }
 
     public static Graph exploreAttackPathJump(Vertex V, Set<Integer> Forbidden) {
-        List<Graph> graphs = exploreAttackPath2(V, Forbidden);
+        System.out.println(System.currentTimeMillis() + "(main): exploreAttackPath2 for vertex " + V.getID());
+        HashSet<Graph> graphs = exploreAttackPath2(V, Forbidden);
         if ( graphs == null || graphs.isEmpty() ) {
             return null;
         }
+        System.out.println(System.currentTimeMillis() + "(main): mergeGraphs(" + graphs.size() + ") for vertex " + V.getID());
         return Graph.mergeGraphs(graphs);
     }
 
@@ -90,10 +92,10 @@ public class AttackPaths {
      * @param Forbidden the list of forbidden vertices
      * @return the created attack path
      */
-    private static List<Graph> exploreAttackPath2(Vertex V, Set<Integer> Forbidden) {
-        List<Graph> Result = null;
-        List<Graph> Buffers = new ArrayList<>();
-        List<Graph> AtomicBuffers = new ArrayList<>();
+    private static HashSet<Graph> exploreAttackPath2(Vertex V, Set<Integer> Forbidden) {
+        HashSet<Graph> Result = null;
+        HashSet<Graph> Buffers = new HashSet<>();
+        HashSet<Graph> AtomicBuffers = new HashSet<>();
 
         // Must reset the reference so we don't modify the incoming map
         Forbidden = new HashSet<>(Forbidden);
@@ -107,7 +109,7 @@ public class AttackPaths {
                 if (D.getType() == VertexType.LEAF) {
                     Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
                 } else if (D.getType() == VertexType.OR) {
-                    List<Graph> parentRes = exploreAttackPath2(D, Forbidden);
+                    HashSet<Graph> parentRes = exploreAttackPath2(D, Forbidden);
 
                     //One parent of the AND is missing -> Delete the whole branch
                     if (parentRes == null) {
@@ -123,7 +125,7 @@ public class AttackPaths {
                 if (D.getType() == VertexType.LEAF) {
                     Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
                 } else if (D.getType() == VertexType.AND) {
-                    List<Graph> parentRes = exploreAttackPath2(D, Forbidden);
+                    HashSet<Graph> parentRes = exploreAttackPath2(D, Forbidden);
 
                     if (parentRes != null) {
                         AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));

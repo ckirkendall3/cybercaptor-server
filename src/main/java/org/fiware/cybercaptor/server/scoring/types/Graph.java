@@ -182,18 +182,17 @@ public class Graph implements Comparable<Graph> {
      * @param graphs list of graphs to merge
      * @return the merged graph
      */
-    public static Graph mergeGraphs(List<Graph> graphs) {
-        Collections.sort(graphs);
-        Graph firstGraph = graphs.remove(0);
-        firstGraph = new Graph(new HashSet<>(firstGraph.getArcs()), new HashMap<>(firstGraph.getVertexMap()));
+    public static Graph mergeGraphs(HashSet<Graph> graphs) {
+
+        Graph result = new Graph(new HashSet<>(), new HashMap<>());
         for ( Graph graph : graphs ) {
             if ( graph != null ) {
-                firstGraph.Arcs.addAll(graph.getArcs());
-                firstGraph.VertexMap.putAll(graph.getVertexMap());
+                result.Arcs.addAll(graph.getArcs());
+                result.VertexMap.putAll(graph.getVertexMap());
             }
         }
 
-        return firstGraph;
+        return result;
     }
 
     /**
@@ -216,6 +215,7 @@ public class Graph implements Comparable<Graph> {
      */
     public void preProcessGraph() {
 
+        int numGraphs = 0;
         for (Arc arc : Arcs) {
             Vertex source = VertexMap.get(arc.getSource());
             Vertex destination = VertexMap.get(arc.getDestination());
@@ -225,6 +225,7 @@ public class Graph implements Comparable<Graph> {
 
                 // Create the atomic graph for this arc
                 Graph atomicGraph = createAtomicGraph(source, destination);
+                numGraphs++;
                 source.addPredecessorAtomicGraph(destination.getID(), atomicGraph);
 
 //                if (destination.getType() == VertexType.LEAF) {
@@ -235,6 +236,7 @@ public class Graph implements Comparable<Graph> {
             }
         }
 
+        System.out.println(System.currentTimeMillis() + ": Number of graphs created " + numGraphs);
         // This is an optimization to see if we can generate successor graphs for inner nodes close to the leaves.
 //        int nodesFullyOptimized = 0;
 //        for (int i = 0; i < 2; i++) {
