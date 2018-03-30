@@ -23,13 +23,13 @@ import java.util.logging.Logger;
  */
 public class AttackPathsTest {
 
+    private static int loopCount = 1;
     /**
      * Test attack graph evaluation
      */
     @Test
     public void testAttackGraphEval() throws Exception {
         long startMillis = System.nanoTime();
-        int loopCount = 2;
         for (int loop = 0; loop < loopCount; loop++ ) {
             String path =
                     Paths.get(this.getClass().getClassLoader().getResource("AttackGraph.xml").toURI()).toFile().getAbsolutePath();
@@ -96,7 +96,6 @@ public class AttackPathsTest {
     @Test
     public void testAttackGraphEval2() throws Exception {
         long startMillis = System.nanoTime();
-        int loopCount = 2;
         for (int loop = 0; loop < loopCount; loop++ ) {
             String path =
                     Paths.get(this.getClass().getClassLoader().getResource("AttackGraph.xml").toURI()).toFile().getAbsolutePath();
