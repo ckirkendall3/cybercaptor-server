@@ -82,8 +82,8 @@ public class AttackPathsTest {
                 if ( attackPath.getVertexMap().size() > 3) {
                     count++;
                 }
-                //System.out.println(System.currentTimeMillis() + ": AttackPath(arcs:" + attackPath.getArcs().size() +
-                //        ", vertices:" + attackPath.getVertexMap().size() + ")");
+                System.out.println(System.currentTimeMillis() + ": AttackPath(arcs:" + attackPath.getArcs().size() +
+                        ", vertices:" + attackPath.getVertexMap().size() + ")");
             }
             System.out.println(System.currentTimeMillis() + " (NEW): Number of attack paths - " + count);
         }

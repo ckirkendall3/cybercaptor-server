@@ -109,14 +109,16 @@ public class AttackPaths {
                 if (D.getType() == VertexType.LEAF) {
                     Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
                 } else if (D.getType() == VertexType.OR) {
-                    HashSet<Graph> parentRes = exploreAttackPath2(D, Forbidden);
+                    if (!AtomicBuffers.contains(V.getPredecessorAtomicGraphs().get(D.getID()))) {
+                        HashSet<Graph> parentRes = exploreAttackPath2(D, Forbidden);
 
-                    //One parent of the AND is missing -> Delete the whole branch
-                    if (parentRes == null) {
-                        return null;
-                    } else {
-                        AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
-                        Buffers.addAll(parentRes);
+                        //One parent of the AND is missing -> Delete the whole branch
+                        if (parentRes == null) {
+                            return null;
+                        } else {
+                            AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                            Buffers.addAll(parentRes);
+                        }
                     }
                 }
             }
