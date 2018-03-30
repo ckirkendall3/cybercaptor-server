@@ -27,7 +27,7 @@ import java.util.*;
  *
  * @author K. M.
  */
-public class Graph {
+public class Graph implements Comparable<Graph> {
 
     /**
      * The arcs of the graph
@@ -167,7 +167,7 @@ public class Graph {
      * @param D a vertex
      * @return the new graph
      */
-    private static Graph createAtomicGraph(Vertex V, Vertex D) {
+    public static Graph createAtomicGraph(Vertex V, Vertex D) {
         Map<Integer, Vertex> vertices = new HashMap<>();
         vertices.put(V.getID(), V);
         vertices.put(D.getID(), D);
@@ -183,17 +183,17 @@ public class Graph {
      * @return the merged graph
      */
     public static Graph mergeGraphs(List<Graph> graphs) {
-        Set<Arc> arcs = new HashSet<>();
-        Map<Integer, Vertex> vertices = new HashMap<>();
-
+        Collections.sort(graphs);
+        Graph firstGraph = graphs.remove(0);
+        firstGraph = new Graph(new HashSet<>(firstGraph.getArcs()), new HashMap<>(firstGraph.getVertexMap()));
         for ( Graph graph : graphs ) {
             if ( graph != null ) {
-                arcs.addAll(graph.getArcs());
-                vertices.putAll(graph.getVertexMap());
+                firstGraph.Arcs.addAll(graph.getArcs());
+                firstGraph.VertexMap.putAll(graph.getVertexMap());
             }
         }
 
-        return new Graph(arcs, vertices);
+        return firstGraph;
     }
 
     /**
@@ -227,58 +227,71 @@ public class Graph {
                 Graph atomicGraph = createAtomicGraph(source, destination);
                 source.addPredecessorAtomicGraph(destination.getID(), atomicGraph);
 
-                // Create the successor graphs for the leaf nodes for optimization
-                if (destination.getType().equals(VertexType.LEAF)) {
-                    destination.addSuccessorGraph(source.getID(), atomicGraph);
-                }
+//                if (destination.getType() == VertexType.LEAF) {
+//                    destination.addSuccessorGraph(source.getID(), atomicGraph);
+//                }
+            } else {
+                System.out.println(source.getID() + ":" + source.getType().toString() + " - " + destination.getID());
             }
         }
 
         // This is an optimization to see if we can generate successor graphs for inner nodes close to the leaves.
-        for (int i = 0; i < 3; i++) {
-            for (Vertex vertex : VertexMap.values()) {
-                if ( vertex.getType().equals(VertexType.LEAF) || vertex.getPredecessorsGraph() != null ) {
-                    // Already optimized
-                    continue;
-                }
+//        int nodesFullyOptimized = 0;
+//        for (int i = 0; i < 2; i++) {
+//            for (Vertex vertex : VertexMap.values()) {
+//                if ( vertex.getType().equals(VertexType.LEAF) || vertex.getPredecessorsGraph() != null ) {
+//                    // Already optimized
+//                    continue;
+//                }
+//
+//                // Walk through the predecessors and see if they all have successor graphs for this node.
+//                boolean complete = true;
+//                List<Graph> childGraphs = new ArrayList<>();
+//                for (Vertex predecessor : vertex.getPredecessors()) {
+//                    if (predecessor.getType() != vertex.getType()) {
+//                        Map<Integer, Graph> predecessorSuccessorGraphs = predecessor.getSuccessorGraphs();
+//                        Graph predecessorsGraph = predecessor.getPredecessorsGraph();
+//                        Graph successorGraph = predecessorSuccessorGraphs.get(vertex.getID());
+//
+//                        if ( successorGraph == null ) {
+//                            if (predecessorsGraph != null) {
+//                                if (predecessorSuccessorGraphs.containsKey(vertex.getID())) {
+//                                    continue;
+//                                }
+//                                List<Graph> graphsToMerge = new ArrayList<>(Arrays.asList(
+//                                        vertex.getPredecessorAtomicGraphs().get(predecessor.getID()),
+//                                        predecessorsGraph));
+//
+//                                successorGraph = mergeGraphs(graphsToMerge);
+//
+//                                // Add successor graph to the predecessors
+//                                predecessorSuccessorGraphs.put(vertex.getID(), successorGraph);
+//                                childGraphs.add(successorGraph);
+//                            } else {
+//                                complete = false;
+//                            }
+//                        }
+//                        else {
+//                            childGraphs.add(successorGraph);
+//                        }
+//                    }
+//                }
+//
+//                if (complete) {
+//                    // Merge all the success graphs together.
+//                    vertex.setPredecessorsGraph(mergeGraphs(childGraphs));
+//                    nodesFullyOptimized++;
+//                }
+//            }
+//        }
+        //System.out.println("OptimizedNodes: " + nodesFullyOptimized);
+    }
 
-                // Walk through the predecessors and see if they all have successor graphs for this node.
-                boolean complete = true;
-                List<Graph> childGraphs = new ArrayList<>();
-                for (Vertex predecessor : vertex.getPredecessors()) {
-                    if (predecessor.getType() != vertex.getType()) {
-                        Map<Integer, Graph> predecessorSuccessorGraphs = predecessor.getSuccessorGraphs();
-                        Graph predecessorsGraph = predecessor.getPredecessorsGraph();
-                        Graph successorGraph = predecessorSuccessorGraphs.get(vertex.getID());
-
-                        if ( successorGraph == null ) {
-                            if (predecessorsGraph != null) {
-                                if (predecessorSuccessorGraphs.containsKey(vertex.getID())) {
-                                    continue;
-                                }
-
-                                successorGraph = mergeGraphs(Arrays.asList(
-                                        vertex.getPredecessorAtomicGraphs().get(predecessor.getID()),
-                                        predecessorsGraph));
-
-                                // Add successor graph to the predecessors
-                                predecessorSuccessorGraphs.put(vertex.getID(), successorGraph);
-                                childGraphs.add(successorGraph);
-                            } else {
-                                complete = false;
-                            }
-                        }
-                        else {
-                            childGraphs.add(successorGraph);
-                        }
-                    }
-                }
-
-                if (complete) {
-                    // Merge all the success graphs together.
-                    vertex.setPredecessorsGraph(mergeGraphs(childGraphs));
-                }
-            }
+    public int compareTo(Graph o) {
+        if (o == null) {
+            return 1;
         }
+
+        return o.getVertexMap().size() - VertexMap.size();
     }
 }

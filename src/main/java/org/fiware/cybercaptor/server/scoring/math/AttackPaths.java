@@ -20,6 +20,7 @@
  ****************************************************************************************/
 package org.fiware.cybercaptor.server.scoring.math;
 
+import org.fiware.cybercaptor.server.scoring.types.Arc;
 import org.fiware.cybercaptor.server.scoring.types.Graph;
 import org.fiware.cybercaptor.server.scoring.types.Vertex;
 import org.fiware.cybercaptor.server.scoring.types.VertexType;
@@ -43,13 +44,43 @@ public class AttackPaths {
     public static Graph[] main(Vertex[] Targets, Graph AttackGraph) {
 
         if (Targets != null) {
+            System.out.println(System.currentTimeMillis() + " (main): Preprocessing Graph");
             AttackGraph.preProcessGraph();
+            System.out.println(System.currentTimeMillis() + "(main): Exploring Attack Paths");
             Graph[] GraphTable = new Graph[Targets.length];
-            Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath2(Targets[i], new HashSet<>(Collections.singletonList(1))));
+            Arrays.parallelSetAll(GraphTable, i -> exploreAttackPathJump(Targets[i],
+                    new HashSet<>(Collections.singletonList(Targets[i].getID()))));
             return GraphTable;
         } else {
             return null;
         }
+    }
+
+    /**
+     * Explore the attack path = generate the attack paths
+     *
+     * @param Targets     the targets nodes in the attack graph
+     * @param AttackGraph the attack graph
+     * @return the list of attack paths
+     */
+    public static Graph[] main2(Vertex[] Targets, Graph AttackGraph) {
+
+        if (Targets != null) {
+            AttackGraph.preProcessGraph();
+            Graph[] GraphTable = new Graph[Targets.length];
+            Arrays.parallelSetAll(GraphTable, i -> exploreAttackPath(Targets[i], new HashSet<>(), AttackGraph));
+            return GraphTable;
+        } else {
+            return null;
+        }
+    }
+
+    public static Graph exploreAttackPathJump(Vertex V, Set<Integer> Forbidden) {
+        List<Graph> graphs = exploreAttackPath2(V, Forbidden);
+        if ( graphs == null || graphs.isEmpty() ) {
+            return null;
+        }
+        return Graph.mergeGraphs(graphs);
     }
 
     /**
@@ -59,91 +90,52 @@ public class AttackPaths {
      * @param Forbidden the list of forbidden vertices
      * @return the created attack path
      */
-    private static Graph exploreAttackPath2(Vertex V, Set<Integer> Forbidden) {
-        Graph Result = null;
+    private static List<Graph> exploreAttackPath2(Vertex V, Set<Integer> Forbidden) {
+        List<Graph> Result = null;
+        List<Graph> Buffers = new ArrayList<>();
+        List<Graph> AtomicBuffers = new ArrayList<>();
 
         // Must reset the reference so we don't modify the incoming map
         Forbidden = new HashSet<>(Forbidden);
 
         List<Vertex> predecessors = V.getPredecessors();
-        List<Graph> Buffers = new ArrayList<>();
-        List<Graph> AtomicBuffers = new ArrayList<>();
-        switch (V.getType()) {
-            case AND: {
-                if (checkForbidden(predecessors, Forbidden)) {
-                    return null;
-                }
-                Result = V.getPredecessorsGraph();
-                for (Vertex D : predecessors) {
-                    switch (D.getType()) {
-                        case LEAF:
-                            Buffers.add(D.getSuccessorGraphs().get(V.getID()));
-                            break;
+        if (V.getType() == VertexType.AND) {
+            if (checkForbidden(predecessors, Forbidden)) {
+                return null;
+            }
+            for (Vertex D : predecessors) {
+                if (D.getType() == VertexType.LEAF) {
+                    Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                } else if (D.getType() == VertexType.OR) {
+                    List<Graph> parentRes = exploreAttackPath2(D, Forbidden);
 
-                        case OR:
-                            Forbidden.add(D.getID());
-                            Graph parentRes = exploreAttackPath2(D, Forbidden);
-
-                            //One parent of the AND is missing -> Delete the whole branch
-                            if (parentRes == null) {
-                                return null;
-                            } else {
-                                AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
-                                Buffers.add(parentRes);
-                            }
-                            break;
-
-                        case AND:
-                            // should never happen with pre-opt
-                            break;
+                    //One parent of the AND is missing -> Delete the whole branch
+                    if (parentRes == null) {
+                        return null;
+                    } else {
+                        AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                        Buffers.addAll(parentRes);
                     }
                 }
-
-                return Result;
             }
+        } else if (V.getType() == VertexType.OR) {
+            for (Vertex D : predecessors) {
+                if (D.getType() == VertexType.LEAF) {
+                    Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                } else if (D.getType() == VertexType.AND) {
+                    List<Graph> parentRes = exploreAttackPath2(D, Forbidden);
 
-            case OR: {
-                for (Vertex D : predecessors) {
-                    switch (D.getType()) {
-                        case LEAF:
-                            Buffers.add(D.getSuccessorGraphs().get(V.getID()));
-                            break;
-
-                        case AND:
-                            Graph parentRes = exploreAttackPath2(D, Forbidden);
-
-                            //One parent of the AND is missing -> Delete the whole branch
-                            if (parentRes != null) {
-                                Graph BufferGraph = D.getSuccessorGraphs().get(V.getID());
-
-                                if (BufferGraph == null) {
-                                    BufferGraph = parentRes;
-                                    AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
-                                }
-                                Buffers.add(BufferGraph);
-                            }
-                            break;
-
-                        case OR:
-                            // Should never happen with pre-opt
-                            break;
+                    if (parentRes != null) {
+                        AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                        Buffers.addAll(parentRes);
                     }
                 }
-
-                if (V.getPredecessorsGraph() != null && predecessors.size() == Buffers.size()) {
-                    Result = V.getPredecessorsGraph();
-                }
             }
-
-            case LEAF:
-                break;
         }
 
-        if (Result == null) {
-            if (!Buffers.isEmpty() || !AtomicBuffers.isEmpty() ) {
-                Buffers.addAll(AtomicBuffers);
-                Result = Graph.mergeGraphs(Buffers);
-            }
+        if (!Buffers.isEmpty()) {
+            Buffers.addAll(AtomicBuffers);
+            Result = Buffers;
         }
 
         return Result;
@@ -162,12 +154,123 @@ public class AttackPaths {
                 if (forbidden.contains(vertex.getID())) {
                     return true;
                 }
-                //else {
-                //    forbidden.add(vertex.getID());
-                //}
+                else {
+                    forbidden.add(vertex.getID());
+                }
             }
         }
         return false;
     }
 
+    private static Graph exploreAttackPath(Vertex V, Set<Integer> Forbidden, Graph graph) {
+        Graph Result = null;
+
+        // Must reset the reference so we don't modify the incoming map
+        Forbidden = new HashSet<>(Forbidden);
+
+        List<Vertex> predecessors = V.getPredecessors();
+        if (V.getType().equals(VertexType.AND)) {
+            if (predecessors != null) {
+                List<Graph> Buffers = new ArrayList<>();
+                for (Vertex D : predecessors) {
+                    if (D != null) {
+                        if (D.getType().equals(VertexType.LEAF)) {
+                            Buffers.add(createAtomicGraph(V, D));
+                        } else if (D.getType().equals(VertexType.OR)) {
+                            if (!Forbidden.contains(D.getID())) {
+                                if (Forbidden.isEmpty()) {
+                                    Forbidden.add(D.getID());
+                                } else {
+                                    Forbidden.add(D.getID());
+                                }
+                                Graph BufferGraph = createAtomicGraph(V, D);
+                                Graph parentRes = exploreAttackPath(D, Forbidden, graph);
+
+                                //One parent of the AND is missing -> Delete the whole branch
+                                if (parentRes == null) {
+                                    return null;
+                                } else {
+                                    Buffers.add(mergeGraphs(BufferGraph, parentRes));
+                                }
+                            } else {
+                                return null;
+                            }
+                        }
+                    }
+                }
+                for (Graph Buffer1 : Buffers) {
+                    if (Buffer1 == null) {
+                        return null;
+                    }
+                }
+                for (Graph Buffer : Buffers) {
+                    Result = mergeGraphs(Result, Buffer);
+                }
+            }
+            return Result;
+        }
+        if (V.getType().equals(VertexType.OR)) {
+            if ( Forbidden.isEmpty() ) {
+                Forbidden.add(V.getID());
+            }
+            if (predecessors != null) {
+                Graph Buffer = null;
+                boolean atLeastOnePath = false;
+                for (Vertex D : predecessors) {
+                    if (D != null) {
+                        if (D.getType().equals(VertexType.LEAF)) {
+                            Buffer = mergeGraphs(Buffer, createAtomicGraph(V, D));
+                            atLeastOnePath = true;
+                        } else if (D.getType().equals(VertexType.AND)) {
+                            Graph TempBuffer = exploreAttackPath(D, Forbidden, graph);
+                            if (TempBuffer != null) {
+                                Buffer = mergeGraphs(Buffer, mergeGraphs(createAtomicGraph(V, D), TempBuffer));
+                                atLeastOnePath = true;
+                            }
+                        }
+                    }
+                }
+                if (!atLeastOnePath) {
+                    return null;
+                } else
+                    return Buffer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Merge two graphs in a new graph
+     *
+     * @param successor   the first graph
+     * @param predecessor the secon graph
+     * @return the merged graph
+     */
+    private static Graph mergeGraphs(Graph successor, Graph predecessor) {
+        if (successor == null) {
+            return predecessor;
+        }
+        if (predecessor == null) {
+            return successor;
+        }
+
+        Set<Arc>             predecessorArcs      = predecessor.getArcs();
+        Map<Integer, Vertex> predecessorVertexMap = predecessor.getVertexMap();
+
+        predecessorArcs.addAll(successor.getArcs());
+        predecessorVertexMap.putAll(successor.getVertexMap());
+
+        return new Graph(predecessorArcs, predecessorVertexMap);
+    }
+
+    /**
+     * Create an atomic graph from two vertices
+     *
+     * @param V a vertex
+     * @param D a vertex
+     * @return the new graph
+     */
+    private static Graph createAtomicGraph(Vertex V, Vertex D) {
+        return Graph.createAtomicGraph(V, D);
+    }
 }

@@ -95,6 +95,7 @@ public class Launch {
         System.out.println("Generate Attack Paths");
         Graph[] result = AttackPaths.main(TargetSet, graph); //Disabled following the test launch of attack path algorithm.
 
+        System.out.println("Scoring Attack Paths");
         double scoreAttackGraph = formulas.MinMax(formulas.globalScore(graph), previousMaxScore);
 
         saveToXmlFile(pathToAttackPathsFile, result);
