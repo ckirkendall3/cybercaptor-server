@@ -27,7 +27,7 @@ public class AttackPathsTest {
     /**
      * Test attack graph evaluation
      */
-    //@Test
+    @Test
     public void testAttackGraphEval() throws Exception {
         long startMillis = System.nanoTime();
         for (int loop = 0; loop < loopCount; loop++ ) {
@@ -93,7 +93,7 @@ public class AttackPathsTest {
     /**
      * Test attack graph evaluation
      */
-    @Test
+    //@Test
     public void testAttackGraphEval2() throws Exception {
         long startMillis = System.nanoTime();
         for (int loop = 0; loop < loopCount; loop++ ) {
