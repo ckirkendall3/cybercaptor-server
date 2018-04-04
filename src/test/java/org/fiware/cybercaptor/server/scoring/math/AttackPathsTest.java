@@ -27,12 +27,12 @@ public class AttackPathsTest {
     /**
      * Test attack graph evaluation
      */
-    @Test
+    //@Test
     public void testAttackGraphEval() throws Exception {
         long startMillis = System.nanoTime();
         for (int loop = 0; loop < loopCount; loop++ ) {
             String path =
-                    Paths.get(this.getClass().getClassLoader().getResource("AttackGraph2.xml").toURI()).toFile().getAbsolutePath();
+                    Paths.get(this.getClass().getClassLoader().getResource("AttackGraph.xml").toURI()).toFile().getAbsolutePath();
 
             //System.out.println(System.currentTimeMillis() + ": Loading mulval attack graph from file");
             MulvalAttackGraph mulvalAttackGraph = new MulvalAttackGraph();
