@@ -44,9 +44,9 @@ public class AttackPaths {
     public static Graph[] main(Vertex[] Targets, Graph AttackGraph) {
 
         if (Targets != null) {
-            System.out.println(System.currentTimeMillis() + " (main): Preprocessing Graph");
+            //System.out.println(System.currentTimeMillis() + " (main): Preprocessing Graph");
             AttackGraph.preProcessGraph();
-            System.out.println(System.currentTimeMillis() + "(main): Exploring Attack Paths");
+            //System.out.println(System.currentTimeMillis() + "(main): Exploring Attack Paths");
             Graph[] GraphTable = new Graph[Targets.length];
             Arrays.parallelSetAll(GraphTable, i -> exploreAttackPathJump(Targets[i],
                     new HashSet<>(Collections.singletonList(Targets[i].getID()))));
@@ -77,8 +77,8 @@ public class AttackPaths {
 
     public static Graph exploreAttackPathJump(Vertex V, Set<Integer> Forbidden) {
         System.out.println(System.currentTimeMillis() + "(main): exploreAttackPath2 for vertex " + V.getID());
-        HashSet<Graph> graphs = exploreAttackPath2(V, Forbidden);
-        if ( graphs == null || graphs.isEmpty() ) {
+        HashSet<Graph> graphs = exploreAttackPath2(V, Forbidden, new HashSet<Integer>());
+        if (graphs == null || graphs.isEmpty()) {
             return null;
         }
         System.out.println(System.currentTimeMillis() + "(main): mergeGraphs(" + graphs.size() + ") for vertex " + V.getID());
@@ -92,15 +92,16 @@ public class AttackPaths {
      * @param Forbidden the list of forbidden vertices
      * @return the created attack path
      */
-    private static HashSet<Graph> exploreAttackPath2(Vertex V, Set<Integer> Forbidden) {
+    private static HashSet<Graph> exploreAttackPath2(Vertex V, Set<Integer> Forbidden, Set<Integer> completed) {
         HashSet<Graph> Result = null;
         HashSet<Graph> Buffers = new HashSet<>();
-        HashSet<Graph> AtomicBuffers = new HashSet<>();
 
         // Must reset the reference so we don't modify the incoming map
         Forbidden = new HashSet<>(Forbidden);
 
         List<Vertex> predecessors = V.getPredecessors();
+        int numCompleted = 0;
+        Set<Integer> currentVertexCompleted = new HashSet<>();
         if (V.getType() == VertexType.AND) {
             if (checkForbidden(predecessors, Forbidden)) {
                 return null;
@@ -108,37 +109,58 @@ public class AttackPaths {
             for (Vertex D : predecessors) {
                 if (D.getType() == VertexType.LEAF) {
                     Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                    currentVertexCompleted.add(D.getID());
+                    numCompleted++;
                 } else if (D.getType() == VertexType.OR) {
-                    if (!AtomicBuffers.contains(V.getPredecessorAtomicGraphs().get(D.getID()))) {
-                        HashSet<Graph> parentRes = exploreAttackPath2(D, Forbidden);
+                    //System.out.println(String.format(format, 'O', D.getID()).replaceAll(" ", "."));
+                    HashSet<Graph> parentRes = exploreAttackPath2(D, Forbidden, completed);
 
-                        //One parent of the AND is missing -> Delete the whole branch
-                        if (parentRes == null) {
-                            return null;
-                        } else {
-                            AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
-                            Buffers.addAll(parentRes);
+                    //One parent of the AND is missing -> Delete the whole branch
+                    if (parentRes == null) {
+                        return null;
+                    } else {
+                        Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                        Buffers.addAll(parentRes);
+                        if (completed.contains(D.getID())) {
+                            numCompleted++;
                         }
                     }
                 }
             }
         } else if (V.getType() == VertexType.OR) {
             for (Vertex D : predecessors) {
+                boolean predComplete = completed.contains(D.getID());
                 if (D.getType() == VertexType.LEAF) {
-                    Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                    if (!predComplete) {
+                        Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                        currentVertexCompleted.add(D.getID());
+                    }
+                    numCompleted++;
                 } else if (D.getType() == VertexType.AND) {
-                    HashSet<Graph> parentRes = exploreAttackPath2(D, Forbidden);
+                    if (!predComplete) {
+                        HashSet<Graph> parentRes = exploreAttackPath2(D, Forbidden, completed);
 
-                    if (parentRes != null) {
-                        AtomicBuffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
-                        Buffers.addAll(parentRes);
+                        if (parentRes != null) {
+                            Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                            Buffers.addAll(parentRes);
+                            if (completed.contains(D.getID())) {
+                                numCompleted++;
+                            }
+                        }
+                    } else {
+                        Buffers.add(V.getPredecessorAtomicGraphs().get(D.getID()));
+                        numCompleted++;
                     }
                 }
             }
         }
 
+        if (numCompleted == predecessors.size()) {
+            completed.add(V.getID());
+        }
+        completed.addAll(currentVertexCompleted);
+
         if (!Buffers.isEmpty()) {
-            Buffers.addAll(AtomicBuffers);
             Result = Buffers;
         }
 
@@ -157,8 +179,7 @@ public class AttackPaths {
             if (vertex.getType().equals(VertexType.OR)) {
                 if (forbidden.contains(vertex.getID())) {
                     return true;
-                }
-                else {
+                } else {
                     forbidden.add(vertex.getID());
                 }
             }
@@ -214,7 +235,7 @@ public class AttackPaths {
             return Result;
         }
         if (V.getType().equals(VertexType.OR)) {
-            if ( Forbidden.isEmpty() ) {
+            if (Forbidden.isEmpty()) {
                 Forbidden.add(V.getID());
             }
             if (predecessors != null) {
@@ -258,7 +279,7 @@ public class AttackPaths {
             return successor;
         }
 
-        Set<Arc>             predecessorArcs      = predecessor.getArcs();
+        Set<Arc> predecessorArcs = predecessor.getArcs();
         Map<Integer, Vertex> predecessorVertexMap = predecessor.getVertexMap();
 
         predecessorArcs.addAll(successor.getArcs());

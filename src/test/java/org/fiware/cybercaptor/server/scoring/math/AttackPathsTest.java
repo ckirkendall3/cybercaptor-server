@@ -69,20 +69,24 @@ public class AttackPathsTest {
             Graph graph = new Graph(ArcsTable, VerticesTable);
             Vertex[] TargetSet = Graph.getVerticesOnTypeAndFact(VerticesTable, VertexType.OR);
 
-            //System.out.println(System.currentTimeMillis() + ": Generate Attack Paths");
-            Graph[] result = AttackPaths.main(TargetSet, graph); //Disabled following the test launch of attack path algorithm.
+            //System.out.println(System.currentTimeMillis() + "(NEW): Generate Attack Paths");
+            Graph[] result = AttackPaths.main(TargetSet, graph);
+            //Graph[] result = new Graph[1];
+            //graph.preProcessGraph();
+            //result[0] = AttackPaths.exploreAttackPathJump(TargetSet[1],
+            //        new HashSet<>(Collections.singletonList(TargetSet[1].getID())));
 
-            //System.out.println(System.currentTimeMillis() + ": Scoring Attack Paths");
+            //System.out.println(System.currentTimeMillis() + "(NEW): Scoring Attack Paths");
             ScoringFormulas formulas = new ScoringFormulas();
             double scoreAttackGraph = formulas.MinMax(formulas.globalScore(graph), 1);
-            //System.out.println(System.currentTimeMillis() + ": Attack path score: " + scoreAttackGraph);
+            System.out.println(System.currentTimeMillis() + "(NEW): Attack path score: " + scoreAttackGraph);
 
             int count = 0;
             for (Graph attackPath : result) {
                 if ( attackPath.getVertexMap().size() > 3) {
                     count++;
                 }
-                System.out.println(System.currentTimeMillis() + ": AttackPath(arcs:" + attackPath.getArcs().size() +
+                System.out.println(System.currentTimeMillis() + "(NEW): AttackPath(arcs:" + attackPath.getArcs().size() +
                         ", vertices:" + attackPath.getVertexMap().size() + ")");
             }
             System.out.println(System.currentTimeMillis() + " (NEW): Number of attack paths - " + count);
@@ -141,15 +145,15 @@ public class AttackPathsTest {
             //System.out.println(System.currentTimeMillis() + ": Scoring Attack Paths");
             ScoringFormulas formulas = new ScoringFormulas();
             double scoreAttackGraph = formulas.MinMax(formulas.globalScore(graph), 1);
-            //System.out.println(System.currentTimeMillis() + ": Attack path score: " + scoreAttackGraph);
+            System.out.println(System.currentTimeMillis() + ": Attack path score: " + scoreAttackGraph);
 
             int count = 0;
             for (Graph attackPath : result) {
                 if ( attackPath.getVertexMap().size() > 3) {
                     count++;
                 }
-                //System.out.println(System.currentTimeMillis() + ": AttackPath(arcs:" + attackPath.getArcs().size() +
-                //", vertices:" + attackPath.getVertexMap().size() + ")");
+                System.out.println(System.currentTimeMillis() + ": AttackPath(arcs:" + attackPath.getArcs().size() +
+                ", vertices:" + attackPath.getVertexMap().size() + ")");
             }
             System.out.println(System.currentTimeMillis() + ": Number of attack paths - " + count);
         }

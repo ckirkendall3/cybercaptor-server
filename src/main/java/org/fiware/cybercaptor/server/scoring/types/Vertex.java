@@ -58,16 +58,6 @@ public class Vertex {
     private List<Vertex> Predecessors = new ArrayList<>();
 
     /**
-     * Graphs by successors
-     */
-    private Map<Integer, Graph> SuccessorGraphs = new HashMap<>();
-
-    /**
-     * Graph of predecessors
-     */
-    private Graph PredecessorsGraph = null;
-
-    /**
      * Map of atomic maps to all this vertices predecessors.
      */
     private Map<Integer, Graph> PredecessorAtomicGraphs = new HashMap<>();
@@ -203,22 +193,6 @@ public class Vertex {
 
     public void addPredecessor(Vertex vertex) {
         Predecessors.add(vertex);
-    }
-
-    public Map<Integer, Graph> getSuccessorGraphs() {
-        return SuccessorGraphs;
-    }
-
-    public void addSuccessorGraph(int successorId, Graph graph) {
-        SuccessorGraphs.put(successorId, graph);
-    }
-
-    public Graph getPredecessorsGraph() {
-        return PredecessorsGraph;
-    }
-
-    public void setPredecessorsGraph(Graph predecessorsGraph) {
-        PredecessorsGraph = predecessorsGraph;
     }
 
     public Map<Integer, Graph> getPredecessorAtomicGraphs() {
