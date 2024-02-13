@@ -21,6 +21,7 @@
 package org.fiware.cybercaptor.server.informationsystem;
 
 
+import java.nio.file.Files;
 import org.fiware.cybercaptor.server.attackgraph.SecurityRequirement;
 import org.fiware.cybercaptor.server.database.Database;
 import org.fiware.cybercaptor.server.flowmatrix.FlowMatrix;
@@ -99,7 +100,7 @@ public class InformationSystem implements Cloneable {
      * @throws Exception
      */
     public void exportToMulvalDatalogFile(String mulvalFilePath) throws Exception {
-        PrintWriter fichier = new PrintWriter(new BufferedWriter(new FileWriter(mulvalFilePath)));
+        PrintWriter fichier = new PrintWriter(Files.newBufferedWriter(mulvalFilePath.toPath()));
 
         //Add internet
         fichier.println("/**********************************/");
