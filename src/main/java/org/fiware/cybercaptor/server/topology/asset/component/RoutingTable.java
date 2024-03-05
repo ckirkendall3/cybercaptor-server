@@ -73,7 +73,7 @@ public class RoutingTable implements Cloneable {
      */
     public Route addRoute(IPAddress destination, IPAddress mask, IPAddress gateway, Interface intface) {
         Route route = new Route(destination, gateway, mask, intface);
-        if (destination.getAddress().equals("0.0.0.0") && gateway.getAddress().equals("0.0.0.0")) { //Default route
+        if ("0.0.0.0".equals(destination.getAddress()) && "0.0.0.0".equals(gateway.getAddress())) { //Default route
             if (hasDefaultRoute()) {
                 this.getRouteList().remove(this.getRouteList().size() - 1);
                 this.getRouteList().add(route);
@@ -94,7 +94,7 @@ public class RoutingTable implements Cloneable {
      * @return true if this routing table has a default route, else false
      */
     public boolean hasDefaultRoute() {
-        return this.getRouteList().size() > 0 && this.getRouteList().get(this.getRouteList().size() - 1).getDestination().getAddress().equals("0.0.0.0") && this.getRouteList().get(this.getRouteList().size() - 1).getMask().getAddress().equals("0.0.0.0");
+        return this.getRouteList().size() > 0 && "0.0.0.0".equals(this.getRouteList().get(this.getRouteList().size() - 1).getDestination().getAddress()) && "0.0.0.0".equals(this.getRouteList().get(this.getRouteList().size() - 1).getMask().getAddress());
     }
 
     /**

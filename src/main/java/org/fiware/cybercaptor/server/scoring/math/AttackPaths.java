@@ -127,7 +127,7 @@ public class AttackPaths {
             arcs[m] = new Arc(graph.getArcs()[m].getSource(), graph.getArcs()[m].getDestination());
         }
         Vertex[] V_Predecessors = Graph.getPredecessors(arcs, vertices, V.getID());
-        if (V.getType().equals("OR") && Forbidden == null) {
+        if ("OR".equals(V.getType()) && Forbidden == null) {
             Vertex ForbiddenVertex = new Vertex(V);
             Forbidden = new Vertex[1];
             Forbidden[0] = ForbiddenVertex;

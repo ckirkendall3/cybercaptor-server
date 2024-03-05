@@ -231,12 +231,12 @@ public class AttackPath extends MulvalAttackGraph implements Cloneable {
                 if (vertex.fact != null && vertex.fact.datalogCommand != null
                         && vertex.fact.datalogCommand.command != null) {
                     String command = vertex.fact.datalogCommand.command;
-                    if (command.equals("vulExists") || command.equals("hacl") || command.equals("haclprimit") || command.toLowerCase().contains("vlan") || command.contains("attackerLocated"))
+                    if ("vulExists".equals(command) || "hacl".equals(command) || "haclprimit".equals(command) || command.toLowerCase().contains("vlan") || command.contains("attackerLocated"))
                         result.add(vertex);
                 }
             } else {
                 if (vertex.fact != null && vertex.fact.datalogCommand != null
-                        && vertex.fact.datalogCommand.command != null && vertex.fact.datalogCommand.command.equals("hacl")) {
+                        && vertex.fact.datalogCommand.command != null && "hacl".equals(vertex.fact.datalogCommand.command)) {
                     result.add(vertex);
                 }
             }
@@ -467,43 +467,43 @@ public class AttackPath extends MulvalAttackGraph implements Cloneable {
             Vertex vertex = this.vertices.get(i);
             if (vertex.fact != null && vertex.fact.type == FactType.DATALOG_FACT) {
                 DatalogCommand command = vertex.fact.datalogCommand;
-                if (command.command.equals("vulExists")) {
+                if ("vulExists".equals(command.command)) {
                     scoring *= 1. / 2;
                 }
-                if (command.command.equals("cvss") && command.params[1].equals("l")) {
+                if ("cvss".equals(command.command) && "l".equals(command.params[1])) {
                     scoring *= 1. / 5;
                 }
-                if (command.command.equals("cvss") && command.params[1].equals("m")) {
+                if ("cvss".equals(command.command) && "m".equals(command.params[1])) {
                     scoring *= 1. / 10;
                 }
-                if (command.command.equals("cvss") && command.params[1].equals("h")) {
+                if ("cvss".equals(command.command) && "h".equals(command.params[1])) {
                     scoring *= 1. / 20;
-                } else if (command.command.equals("inCompetent")) {
+                } else if ("inCompetent".equals(command.command)) {
                     scoring *= 1. / 100;
                 }
                 //Cheat to have the good attack path for demo first :
-                if (command.command.equals("vulExists") && command.params[1].equals("CVE-2004-1315")) {
+                if ("vulExists".equals(command.command) && "CVE-2004-1315".equals(command.params[1])) {
                     scoring *= 10;
                 }
-                if (command.command.equals("vulExists") && command.params[1].equals("CVE-2012-3951")) {
+                if ("vulExists".equals(command.command) && "CVE-2012-3951".equals(command.params[1])) {
                     scoring *= 10;
                 }
-                if (command.command.equals("networkServiceInfo") && command.params[1].equals("sonicwall_scrutinizer")) {
+                if ("networkServiceInfo".equals(command.command) && "sonicwall_scrutinizer".equals(command.params[1])) {
                     scoring *= 10;
                 }
-                if (command.command.equals("hacl") && command.params[0].equals("192.168.240.200") && command.params[1].equals("192.168.240.100") && command.params[3].equals("3306")) {
+                if ("hacl".equals(command.command) && "192.168.240.200".equals(command.params[0]) && "192.168.240.100".equals(command.params[1]) && "3306".equals(command.params[3])) {
                     scoring *= 10;
                 }
-                if (command.command.equals("hacl") && command.params[0].equals("internet") && command.params[1].equals("192.168.240.200") && command.params[3].equals("80")) {
+                if ("hacl".equals(command.command) && "internet".equals(command.params[0]) && "192.168.240.200".equals(command.params[1]) && "80".equals(command.params[3])) {
                     scoring *= 10;
                 }
-                if (command.command.equals("execCode") && command.params[0].equals("192.168.240.100")) {
+                if ("execCode".equals(command.command) && "192.168.240.100".equals(command.params[0])) {
                     scoring *= 10;
                 }
-                if (command.command.equals("execCode") && command.params[0].equals("192.168.240.200")) {
+                if ("execCode".equals(command.command) && "192.168.240.200".equals(command.params[0])) {
                     scoring *= 10;
                 }
-                if (command.command.equals("netAccess") && command.params[0].equals("192.168.240.200")) {
+                if ("netAccess".equals(command.command) && "192.168.240.200".equals(command.params[0])) {
                     scoring *= 10;
                 }
             }
@@ -650,9 +650,9 @@ public class AttackPath extends MulvalAttackGraph implements Cloneable {
                         result += "\n";
                     }
                     System.out.println("The following firewall rule should be deployed on all the paths between \"" + from.getName() + "\" and \"" + to.getName() + "\". (See above)");
-                    if (command.params[0].equals("internet")) {
+                    if ("internet".equals(command.params[0])) {
                         result += "DROP\t" + Protocol.getProtocolFromString(command.params[2]) + "\t--\t0.0.0.0/0\t" + to.getFirstIPAddress().getAddress() + "/32\t" + "dpt:" + Service.portStringToInt(command.params[3]) + "\n";
-                    } else if (command.params[1].equals("internet")) {
+                    } else if ("internet".equals(command.params[1])) {
                         result += "DROP\t" + Protocol.getProtocolFromString(command.params[2]) + "\t--\t" + from.getFirstIPAddress().getAddress() + "/32\t0.0.0.0/0\t" + "dpt:" + Service.portStringToInt(command.params[3]) + "\n";
                     } else {
                         result += "DROP\t" + Protocol.getProtocolFromString(command.params[2]) + "\t--\t" + from.getFirstIPAddress().getAddress() + "/32\t" + to.getFirstIPAddress().getAddress() + "/32\t" + "dpt:" + Service.portStringToInt(command.params[3]) + "\n";
@@ -769,10 +769,10 @@ public class AttackPath extends MulvalAttackGraph implements Cloneable {
 
                         remediation = new RemediationAction(ActionType.DEPLOY_FIREWALL_RULE, costParametersFolder);
                         remediation.setRelatedVertex(leaf);
-                        if (command.params[0].equals("internet")) {
+                        if ("internet".equals(command.params[0])) {
                             FirewallRule fwRule = new FirewallRule(Action.DROP, Protocol.getProtocolFromString(command.params[2]), new IPAddress("0.0.0.0"), new IPAddress("0.0.0.0"), new PortRange(true), to.getFirstIPAddress(), new IPAddress("255.255.255.255"), PortRange.fromString(command.params[3]), Table.INPUT);
                             remediation.getRemediationParameters().add(fwRule);
-                        } else if (command.params[1].equals("internet")) {
+                        } else if ("internet".equals(command.params[1])) {
                             FirewallRule fwRule = new FirewallRule(Action.DROP, Protocol.getProtocolFromString(command.params[2]), from.getFirstIPAddress(), new IPAddress("255.255.255.255"), new PortRange(true), new IPAddress("0.0.0.0"), new IPAddress("0.0.0.0"), PortRange.fromString(command.params[3]), Table.INPUT);
                             remediation.getRemediationParameters().add(fwRule);
                         } else {
@@ -781,7 +781,7 @@ public class AttackPath extends MulvalAttackGraph implements Cloneable {
                         }
                         //The only thing that change between INPUT and OUTPUT is the machines on which this rule can be deployed
                         for (InformationSystemHost currentAttackerPathHost : anAttackerPath1) {
-                            if (command.params[0].equals("internet")) {//Source packet is internet, input will block on all hosts
+                            if ("internet".equals(command.params[0])) {//Source packet is internet, input will block on all hosts
                                 remediation.getPossibleMachines().add(currentAttackerPathHost);
                             } else {
                                 InformationSystemHost sourceHost = topology.existingMachineByNameOrIPAddress(command.params[0]);
@@ -804,10 +804,10 @@ public class AttackPath extends MulvalAttackGraph implements Cloneable {
 
                         remediation = new RemediationAction(ActionType.DEPLOY_FIREWALL_RULE, costParametersFolder);
                         remediation.setRelatedVertex(leaf);
-                        if (command.params[0].equals("internet")) {
+                        if ("internet".equals(command.params[0])) {
                             FirewallRule fwRule = new FirewallRule(Action.DROP, Protocol.getProtocolFromString(command.params[2]), new IPAddress("0.0.0.0"), new IPAddress("0.0.0.0"), new PortRange(true), to.getFirstIPAddress(), new IPAddress("255.255.255.255"), PortRange.fromString(command.params[3]), Table.OUTPUT);
                             remediation.getRemediationParameters().add(fwRule);
-                        } else if (command.params[1].equals("internet")) {
+                        } else if ("internet".equals(command.params[1])) {
                             FirewallRule fwRule = new FirewallRule(Action.DROP, Protocol.getProtocolFromString(command.params[2]), from.getFirstIPAddress(), new IPAddress("255.255.255.255"), new PortRange(true), new IPAddress("0.0.0.0"), new IPAddress("0.0.0.0"), PortRange.fromString(command.params[3]), Table.OUTPUT);
                             remediation.getRemediationParameters().add(fwRule);
                         } else {
@@ -817,7 +817,7 @@ public class AttackPath extends MulvalAttackGraph implements Cloneable {
 
                         //The only thing that change between INPUT and OUTPUT is the machines on which this rule can be deployed
                         for (InformationSystemHost currentAttackerPathHost : anAttackerPath) {
-                            if (command.params[1].equals("internet")) {//Source packet is internet, input will block on all hosts
+                            if ("internet".equals(command.params[1])) {//Source packet is internet, input will block on all hosts
                                 remediation.getPossibleMachines().add(currentAttackerPathHost);
                             } else {
                                 InformationSystemHost destinationHost = topology.existingMachineByNameOrIPAddress(command.params[1]);

@@ -64,7 +64,7 @@ public class RuleReference {
             setContent(tableau_reference[1]);
 
             Matcher matcherCVE = Vulnerability.PATTERN.matcher(getContent());
-            if (getType().equals("cve") && !matcherCVE.matches())
+            if ("cve".equals(getType()) && !matcherCVE.matches())
                 setContent("CVE-" + getContent());
         }
     }
@@ -76,7 +76,7 @@ public class RuleReference {
      * @throws Exception the exception
      */
     public void saveToDatabase(Connection conn) throws Exception {
-        if (getType().equals("cve")) { //For the moment, we store only cve references
+        if ("cve".equals(getType())) { //For the moment, we store only cve references
             Vulnerability cve = new Vulnerability(getContent());
             cve.addToDatabase(conn);
             setId(cve.id);

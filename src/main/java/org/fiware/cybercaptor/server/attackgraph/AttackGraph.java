@@ -410,7 +410,7 @@ public class AttackGraph implements Cloneable {
             Fact fact = vertex.fact;
             if (fact != null && fact.type == FactType.DATALOG_FACT) {
                 DatalogCommand command = fact.datalogCommand;
-                if (command != null && (command.command.equals("execCode") || command.command.equals("accessFile") || command.command.equals("principalCompromised"))) {
+                if (command != null && ("execCode".equals(command.command) || "accessFile".equals(command.command) || "principalCompromised".equals(command.command))) {
                     attackerGoals.add(vertex);
                 }
             }
@@ -625,7 +625,7 @@ public class AttackGraph implements Cloneable {
     public void loadMetricsFromTopology(InformationSystem informationSystem) throws Exception {
         for (Integer key : vertices.keySet()) {
             Vertex vertex = vertices.get(key);
-            if (vertex.fact != null && vertex.fact.type == FactType.DATALOG_FACT && vertex.fact.datalogCommand.command.equals("execCode")) {
+            if (vertex.fact != null && vertex.fact.type == FactType.DATALOG_FACT && "execCode".equals(vertex.fact.datalogCommand.command)) {
                 //We are in an execCode
                 String hostName = vertex.fact.datalogCommand.params[0];
                 if (hostName != null && !hostName.isEmpty()) {
@@ -652,7 +652,7 @@ public class AttackGraph implements Cloneable {
             Vertex vertex = this.vertices.get(i);
             if (vertex.fact != null && vertex.fact.type == FactType.DATALOG_FACT) {
                 DatalogCommand command = vertex.fact.datalogCommand;
-                if (command.command.equals("execCode")) {
+                if ("execCode".equals(command.command)) {
                     String machineName = command.params[0];
                     InformationSystemHost machine = is.existingMachineByNameOrIPAddress(machineName);
                     if (machine != null) {
@@ -689,7 +689,7 @@ public class AttackGraph implements Cloneable {
                         InformationSystemGraphVertex from = null;
                         InformationSystemGraphVertex to = null;
                         String relatedVulneravility = null;
-                        if (command.params[0].equals("internet") || command.params[0].equals("1.1.1.1") || command.params[0].equals("internet_host")) {
+                        if ("internet".equals(command.params[0]) || "1.1.1.1".equals(command.params[0]) || "internet_host".equals(command.params[0])) {
                             from = result.getMachineVertex(informationSystem.getHostByNameOrIPAddress("internet_host"));
                         } else {
                             InformationSystemHost machine = informationSystem.getHostByNameOrIPAddress(command.params[0]);
@@ -697,7 +697,7 @@ public class AttackGraph implements Cloneable {
                                 from = result.getMachineVertex(machine);
                             }
                         }
-                        if (command.params[1].equals("internet") || command.params[1].equals("1.1.1.1"))
+                        if ("internet".equals(command.params[1]) || "1.1.1.1".equals(command.params[1]))
                             to = result.getMachineVertex(informationSystem.getHostByNameOrIPAddress("1.1.1.1"));
                         else {
                             InformationSystemHost machine = informationSystem.getHostByNameOrIPAddress(command.params[1]);
@@ -741,7 +741,7 @@ public class AttackGraph implements Cloneable {
                         break;
                     case "attackerLocated":
                         InformationSystemGraphVertex attackerVertex = null;
-                        if (command.params[0].equals("internet") || command.params[0].equals("1.1.1.1"))
+                        if ("internet".equals(command.params[0]) || "1.1.1.1".equals(command.params[0]))
                             attackerVertex = result.getMachineVertex(informationSystem.getHostByNameOrIPAddress("1.1.1.1"));
                         else {
                             InformationSystemHost machine = informationSystem.getHostByNameOrIPAddress(command.params[0]);

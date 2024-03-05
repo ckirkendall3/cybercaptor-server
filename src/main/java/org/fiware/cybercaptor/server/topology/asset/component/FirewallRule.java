@@ -115,9 +115,9 @@ public class FirewallRule implements Cloneable {
         PortRange destinationPortRange = new PortRange(true);
 
         //Action
-        if (target.equals("ACCEPT")) {
+        if ("ACCEPT".equals(target)) {
             action = Action.ACCEPT;
-        } else if (target.equals("DROP")) {
+        } else if ("DROP".equals(target)) {
             action = Action.DROP;
         }
 
@@ -429,9 +429,9 @@ public class FirewallRule implements Cloneable {
         DROP, ACCEPT, LOG;
 
         public static Action getActionFromString(String action) {
-            if (action.toLowerCase().equals("drop")) {
+            if ("drop".equals(action.toLowerCase())) {
                 return Action.DROP;
-            } else if (action.toLowerCase().equals("log")) {
+            } else if ("log".equals(action.toLowerCase())) {
                 return Action.LOG;
             } else {
                 return Action.ACCEPT;
@@ -446,13 +446,13 @@ public class FirewallRule implements Cloneable {
         TCP, UDP, ANY, ICMP;
 
         public static Protocol getProtocolFromString(String protocol) {
-            if (protocol.toLowerCase().equals("tcp")) {
+            if ("tcp".equals(protocol.toLowerCase())) {
                 return Protocol.TCP;
-            } else if (protocol.toLowerCase().equals("udp")) {
+            } else if ("udp".equals(protocol.toLowerCase())) {
                 return Protocol.TCP;
-            } else if (protocol.toLowerCase().equals("httpprotocol")) {
+            } else if ("httpprotocol".equals(protocol.toLowerCase())) {
                 return Protocol.TCP;
-            } else if (protocol.toLowerCase().equals("icmp")) {
+            } else if ("icmp".equals(protocol.toLowerCase())) {
                 return Protocol.ICMP;
             } else {
                 return Protocol.ANY;

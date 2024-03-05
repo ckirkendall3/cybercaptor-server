@@ -118,7 +118,7 @@ public class Service implements Cloneable {
         } catch (Exception ignored) {
 
         }
-        if (port.equals("httpPort"))
+        if ("httpPort".equals(port))
             return 80;
 
         return 0;

@@ -258,9 +258,9 @@ public class Rule extends Remediation {
 
         String line;
         while ((line = buff.readLine()) != null) {
-            if (line.trim().equals("Detailed Information:")) {
+            if ("Detailed Information:".equals(line.trim())) {
                 String file_description = "";
-                while ((line = buff.readLine()) != null && !line.trim().equals("--")) { //While we are not a the end of the file, and the line is not empty
+                while ((line = buff.readLine()) != null && !"--".equals(line.trim())) { //While we are not a the end of the file, and the line is not empty
                     if (!line.trim().isEmpty())
                         file_description += line + " ";
                 }

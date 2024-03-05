@@ -445,7 +445,7 @@ public class Host implements Cloneable {
             try {
                 nextIP = this.getRoutingTable().getNextHop(IPAddress.getIPv4NetMask(0));
             } catch (Exception e) {
-                if (e.getMessage().equals("Missing default gateway")) {
+                if ("Missing default gateway".equals(e.getMessage())) {
                     return new ArrayList<Host>();
                 } else
                     throw new Exception(e.getMessage());

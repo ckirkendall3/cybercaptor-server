@@ -130,7 +130,7 @@ public class Interface implements Cloneable {
             if (i2.getNetwork() != null)
                 newInterface.setNetwork(i2.getNetwork());
 
-            if (i1.getNetwork() != null && i1.getNetwork().getName() != null && !i1.getNetwork().getName().equals(""))
+            if (i1.getNetwork() != null && i1.getNetwork().getName() != null && !"".equals(i1.getNetwork().getName()))
                 newInterface.setVlan(i1.getVlan());
             else
                 newInterface.setVlan(i2.getVlan());

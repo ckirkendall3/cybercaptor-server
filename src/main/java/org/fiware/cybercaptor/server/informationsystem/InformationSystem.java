@@ -323,7 +323,7 @@ public class InformationSystem implements Cloneable {
             if (this.topology.getHosts().get(i).getName().equals(name))
                 return (InformationSystemHost) this.topology.getHosts().get(i);
         }
-        if (name.equals("internet"))
+        if ("internet".equals(name))
             return new InformationSystemHost("internet", topology);
 
         return null;

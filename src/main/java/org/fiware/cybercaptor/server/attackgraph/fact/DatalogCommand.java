@@ -94,13 +94,13 @@ public class DatalogCommand implements Cloneable {
      * @throws Exception
      */
     public List<List<InformationSystemHost>> getRoutesBetweenHostsOfHacl(InformationSystem informationSystem) throws Exception {
-        if (!this.command.equals("hacl"))
+        if (!"hacl".equals(this.command))
             throw new Exception("This datalog command is not a hacl");
 
-        if (this.params[0].equals("internet") || this.params[0].equals("1.1.1.1")) {
+        if ("internet".equals(this.params[0]) || "1.1.1.1".equals(this.params[0])) {
             InformationSystemHost to = informationSystem.getHostByNameOrIPAddress(this.params[1]);
             return informationSystem.routesFromInternetTo(to);
-        } else if (this.params[1].equals("internet") || this.params[1].equals("1.1.1.1")) {
+        } else if ("internet".equals(this.params[1]) || "1.1.1.1".equals(this.params[1])) {
             InformationSystemHost from = informationSystem.getHostByNameOrIPAddress(this.params[0]);
             List<List<InformationSystemHost>> result = new ArrayList<List<InformationSystemHost>>();
             result.add(informationSystem.routeToInternetFrom(from));
