@@ -20,6 +20,7 @@
  ****************************************************************************************/
 package org.fiware.cybercaptor.server.remediation;
 
+import io.github.pixee.security.ObjectInputFilters;
 import org.fiware.cybercaptor.server.attackgraph.AttackPath;
 import org.fiware.cybercaptor.server.attackgraph.serializable.SerializableAttackPath;
 import org.fiware.cybercaptor.server.informationsystem.InformationSystem;
@@ -203,6 +204,7 @@ public class DeployableRemediation {
         List<AbstractMap.SimpleEntry<SerializableAttackPath, SerializableDeployableRemediation>> attackPathsRemediations;
         if (remediationsHistoryFile.exists()) {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(remediationsHistoryPath));
+            ObjectInputFilters.enableObjectFilterIfUnprotected(ois);
             attackPathsRemediations = (List<AbstractMap.SimpleEntry<SerializableAttackPath, SerializableDeployableRemediation>>) ois.readObject();
         } else {
             attackPathsRemediations = new ArrayList<AbstractMap.SimpleEntry<SerializableAttackPath, SerializableDeployableRemediation>>();
