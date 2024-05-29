@@ -21,6 +21,7 @@
 
 package org.fiware.cybercaptor.server.remediation;
 
+import io.github.pixee.security.BoundedLineReader;
 import org.fiware.cybercaptor.server.vulnerability.Vulnerability;
 
 import java.io.BufferedReader;
@@ -257,10 +258,10 @@ public class Rule extends Remediation {
         BufferedReader buff = new BufferedReader(new FileReader(filePath));
 
         String line;
-        while ((line = buff.readLine()) != null) {
+        while ((line = BoundedLineReader.readLine(buff, 5_000_000)) != null) {
             if (line.trim().equals("Detailed Information:")) {
                 String file_description = "";
-                while ((line = buff.readLine()) != null && !line.trim().equals("--")) { //While we are not a the end of the file, and the line is not empty
+                while ((line = BoundedLineReader.readLine(buff, 5_000_000)) != null && !line.trim().equals("--")) { //While we are not a the end of the file, and the line is not empty
                     if (!line.trim().isEmpty())
                         file_description += line + " ";
                 }
