@@ -21,6 +21,7 @@
 
 package org.fiware.cybercaptor.server.api;
 
+import io.github.pixee.security.ObjectInputFilters;
 import org.fiware.cybercaptor.server.dra.Alert;
 import org.fiware.cybercaptor.server.informationsystem.InformationSystem;
 import org.fiware.cybercaptor.server.properties.ProjectProperties;
@@ -69,6 +70,7 @@ public class IDMEFManagement {
         List<Alert> alerts;
         if (alertsFile.exists()) {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(alertsTemporaryPath));
+            ObjectInputFilters.enableObjectFilterIfUnprotected(ois);
             try {
                 alerts = (List<Alert>) ois.readObject();
             } catch (InvalidClassException exception) {
@@ -116,6 +118,7 @@ public class IDMEFManagement {
         List<Alert> alerts;
         if (alertsFile.exists()) {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(alertsTemporaryPath));
+            ObjectInputFilters.enableObjectFilterIfUnprotected(ois);
             alerts = (List<Alert>) ois.readObject();
         } else {
             alerts = new ArrayList<Alert>();
